@@ -61,6 +61,7 @@ A language in which the verb agrees with something other than the subject would 
 
 Hindi is such a language.
 In the past tense of a transitive verb, the subject takes the ergative marker \emph{ne} and the verb agrees with the bare object instead \citep{mohanan1994}.
+An object that takes the marker \emph{ko} leaves the verb in its default form.
 In \emph{Ram ne kitaab padhi} `Ram read the book', the verb is feminine because \emph{kitaab} is (Figure~\ref{fig:design}).
 Phrases before the verb can also appear in many orders \citep{ranjan2022}.
 So the nearest noun, the most object-like noun and the noun without a case marker can all differ.
@@ -86,7 +87,7 @@ Second, agreement respects the case rule at its edge, since a \emph{ko}-marked o
 But it does not follow the case-marked role: after the two noun phrases swap places, both models still agree with the old object (\S\ref{sec:swap}).
 Third, word order is not shown to be read through case markers, and n-gram statistics do not fully account for it (\S\ref{sec:wordorder}).
 The two models reach these results with different components of the same kind at a similar depth (\S\ref{sec:models}).
-Overall, we conclude that the encoders build the two judgements from different kinds of computation, and that neither follows case alone.
+Overall, we conclude that the encoders build the two judgements from different kinds of computation, and that neither judgement is shown to follow case alone.
 
 \section{Background}
 \label{sec:background}
@@ -203,10 +204,10 @@ For word order, the heads suffice but are not required.
 \label{sec:redundancy}
 
 A larger set of heads might still be required for word order.
-As $K$ grows, the top $K$ heads restore more of the gap, 0.98 at $K=20$ in MuRIL and 0.84 at $K=40$ in XLM-R-large.
+On documents in neither half, the top $K$ heads restore more of the gap as $K$ grows, 0.98 at $K=20$ in MuRIL and 0.84 at $K=40$ in XLM-R-large.
 Ablating them removes little: 0.19 at $K=40$ in MuRIL, where that is 28\% of the heads, and 0.07 in XLM-R-large (Figure~\ref{fig:components}b).
 Zero ablation agrees (Appendix~\ref{app:sets}).
-For agreement, ablating ten heads removes 0.94 and 0.89 of the gap.
+For agreement, ablating the top ten heads removes 0.94 and 0.89 of the gap on these documents, close to the held-out values.
 
 The MLPs behave alike.
 The top five restore 0.98 [0.94, 1.01] and 0.79 [0.74, 0.85] of the word-order gap, yet ablating them removes only 0.32 [0.22, 0.41] and 0.16 [0.08, 0.23] (Figure~\ref{fig:components}c).
@@ -268,12 +269,13 @@ Agreement is sensitive to a case marker next to the noun but does not simply fol
 If word order were read through case, deleting the moved phrases' markers should cost more of the gap than deleting other words.
 It does not (Figure~\ref{fig:wordorder}a).
 Across 223 pairs, the gap kept after deleting the markers is 0.94 (MuRIL) and 0.96 (XLM-R-large) of the original, against 1.05 and 1.12 after deleting as many other words.
+The shares are not exactly one because deleting words changes the per-word mean, so only their difference matters.
 The differences are 0.04 bits [$-0.05$, 0.15] and 0.05 [$-0.03$, 0.14] (one-sided $p=0.19$ and 0.13).
 A control matched in kind, deleting distant postpositions, agrees (131 pairs), though it lies farther from the moved phrases (Appendix~\ref{app:wordorder}).
 We find no evidence that the moved phrases' markers matter more than other words.
 
 Adjacency statistics explain part of the preference, but not all of it.
-The n-gram cue correlates most strongly with the gap ($|\rho|=0.50$ and 0.46).
+The n-gram cue is the difference in mean per-word surprisal of the two sentences under a trigram model, and it correlates most strongly with the gap ($|\rho|=0.50$ and 0.46).
 Where it favours the reordered sentence (60 pairs), the models still prefer the written one in 62\% of pairs.
 There the circuit's effect in bits depends on the gap and not on the cue.
 Given the gap, the interval of the cue's coefficient lies within $\pm0.11$ bits of zero (Figure~\ref{fig:wordorder}b, c).
@@ -287,7 +289,7 @@ Word order is not shown to be read through case markers, and n-gram statistics d
 \label{sec:models}
 
 The two models build both judgements from different components of the same kind.
-In agreement, the five leading heads lie in layers 8 to 11 of 12 in MuRIL and 19 to 22 of 24 in XLM-R-large.
+In agreement, the top five heads lie in layers 8 to 11 of 12 in MuRIL and 19 to 22 of 24 in XLM-R-large.
 In word order, the top MLPs lie in layers 6 to 10 and 17 to 21.
 No head can be matched across models, but both models use the upper half of the network.
 Within a model the components are stable.
@@ -318,22 +320,20 @@ In Hindi, a marker can change what the verb reads, at least for \emph{ko}.
 
 \paragraph{Earlier mechanisms.}
 One mid-layer head writes the subject's number in Gemma \citep{ferrando2024}.
-Our leading heads lie in the upper half of the network and attend from the verb to the object, the controller in the Hindi ergative clause.
+Our top heads lie in the upper half of the network and attend from the verb to the object, the controller in the Hindi ergative clause.
 Head interventions under a number swap looked like noise in their English models \citep{finlayson2021}.
 Our corruption finds a small set of late heads in two encoders.
 The two results differ in corruption, model and language, so they do not conflict.
 
 \paragraph{What word order reads.}
-We find no marker account of the preference and no complete n-gram account.
-Deleting the moved phrases' markers costs no more than deleting other words.
-The n-gram cue explains part of the gap, but the circuit's effect follows the gap.
-Reordering size is inconclusive (Section~\ref{sec:wordorder}).
-A preference that holds under each test and is carried by many components fits a computation that draws on several cues at once.
+Each test we ran leaves the word-order preference without a single source (Section~\ref{sec:wordorder}).
+It survives the loss of either kind of component, and it is only partly an adjacency effect.
+That fits a computation that draws on several cues at once, as Hindi speakers' choice of order follows both locality and expectation \citep{ranjan2022}.
 We offer no more specific account.
 
 \paragraph{Two encoders.}
 MuRIL and XLM-R-large build the same judgements from different units of the same kind, late heads and upper MLPs at a similar depth (Section~\ref{sec:models}).
-\citet{mueller2022} also found the same layer profiles across models, with few shared neurons among the masked ones.
+\citet{mueller2022} also found the same layer profiles across languages, with few shared neurons in masked models.
 Only the kind and the place match, so we do not say the models share a mechanism.
 
 \paragraph{Measurement.}
@@ -420,6 +420,7 @@ Items & Used for & Size & Docs \\
 Selection half & choose components & 388 & 46 \\
 Held-out half & validate & 351 & 45 \\
 Fresh, drawn & head and MLP sets & 400 & 112 \\
+Fresh, entering & \emph{ne} deletion & 2,137 & --- \\
 Fresh, entering & \emph{ko} test & 956 & 118 \\
 Fresh, entering & swap, masked slot & 2,132 & --- \\
 \midrule
@@ -434,9 +435,9 @@ Fresh, all & size, cues & 471 & 334 \\
 \label{tab:splits}
 \end{table}
 
-\section{Attention and path patching of the leading heads}
+\section{Attention and path patching of the top heads}
 \label{app:heads}
-Table~\ref{tab:heads} adds what the five leading agreement heads attend to and which positions carry their effect.
+Table~\ref{tab:heads} adds what the top five agreement heads attend to and which positions carry their effect.
 The subject and \emph{ne} rows are near zero in path patching because both runs share the subject and \emph{ne}, so this holds by construction and is not evidence about case.
 
 \begin{table*}[!ht]
@@ -460,7 +461,7 @@ XLM-R-large & L21H0 & 0.52 & 0.01 & 0.00 & 0.23 & 0.00 & 0.00 & 0.31 \\
  & L19H3 & 0.26 & 0.03 & 0.07 & 0.04 & 0.00 & 0.00 & 0.04 \\
 \bottomrule
 \end{tabular}
-\caption{The five leading agreement heads. Attention is the mean share of the verb span's attention over 52 clauses, renormalised over real subtokens. The path columns are shares of the gap restored by patching only that head's keys and values from the clean run.}
+\caption{The top five agreement heads. Attention is the mean share of the verb span's attention over 52 clauses, renormalised over real subtokens. The path columns are shares of the gap restored by patching only that head's keys and values from the clean run.}
 \label{tab:heads}
 \end{table*}
 
