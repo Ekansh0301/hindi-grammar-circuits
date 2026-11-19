@@ -18,6 +18,61 @@
 \begin{document}
 \maketitle
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig1_design.pdf}
+  \caption{The two tasks. In each panel the clean run (top) is the sentence as written, and the corrupted run (bottom) is its reordering (a) or the sentence with the object masked (b). Patching copies one component's output from the clean into the corrupted run. The agreement sentence is constructed. ERG: ergative; f, m: feminine, masculine.}
+  \label{fig:design}
+\end{figure*}
+
+\section{Introduction}
+\label{sec:intro}
+
+A language model can pick the grammatical sentence out of a pair, but that does not say how it chose.
+The choice could follow grammar, such as which noun the verb agrees with.
+It could also follow a shortcut, such as the noun that stands closest.
+Behaviour cannot tell the two apart when both give the same answer.
+Mechanistic interpretability can, by finding the network components that carry a decision and testing what they read \citep{wang2023}.
+Such evidence shows whether a network represents roles such as subject and object, or only the statistics of word strings.
+
+Agreement is the best-studied case.
+People make agreement errors by attraction to a nearby noun \citep{bock1991}, and so do neural language models \citep{linzen2016}.
+Mechanistic work has located agreement in neurons of English models \citep{finlayson2021}, in neurons of multilingual models on translated templates \citep{mueller2022}, and in a head that writes the subject's number \citep{ferrando2024}.
+In all of these the subject controls the verb, so a model that looks for the subject passes.
+The study of multilingual encoders left out XLM-R because most of its nouns and verbs split into several subwords \citep{mueller2022}.
+Word order has received less attention.
+To our knowledge, no work has traced a model's preference for one grammatical order of a sentence to components.
+A language in which the verb agrees with something other than the subject would show whether these components look for subjects or for something else.
+
+Hindi is such a language.
+In the past tense of a transitive verb, the subject takes the ergative marker \emph{ne} and the verb agrees with the bare object instead \citep{mohanan1994}.
+In \emph{Ram ne kitaab padhi} `Ram read the book', the verb is feminine because \emph{kitaab} is (Figure~\ref{fig:design}).
+Phrases before the verb can also appear in many orders \citep{ranjan2022}.
+So the nearest noun, the most object-like noun and the noun without a case marker can all differ.
+We study two judgements that depend on these properties.
+Given a written sentence and a reordering of its own words, which was written?
+Given a clause, which verb form is correct?
+Two multilingual encoders make both choices well.
+They prefer the written order in 81\% to 82\% of 8,923 pairs and the correct verb form in 94\% to 95\% of 5,265 orders.
+
+We ask two questions about how.
+Is each judgement carried by a few components or by many?
+And what do the components read?
+For agreement, the verb may agree with the bare noun, as the grammar says (the case account), with the noun that looks like an object (the plausibility account), or with the noun nearest the verb (the position account).
+For word order, the preference may be read at the phrases that moved, through their case markers, or from word-pair statistics such as n-grams.
+
+We trace both judgements in MuRIL (built for Indian languages) and XLM-R-large (trained on 100 languages) by patching and ablating attention heads and MLPs.
+We choose components on one half of the documents and test them once on the other half, against matched random sets.
+We also change the sentences to separate the accounts.
+We make three findings.
+First, agreement runs through a compact set of late attention heads that read the object.
+Word order is redundant: sets of heads or of late MLPs each restore the preference, and removing either leaves most of it (\S\ref{sec:components}, \S\ref{sec:redundancy}).
+Second, agreement respects the case rule at its edge, since a \emph{ko}-marked object loses the verb.
+But it does not follow the case-marked role: after the two noun phrases swap places, both models still agree with the old object (\S\ref{sec:swap}).
+Third, word order is not shown to be read through case markers, and n-gram statistics do not account for it (\S\ref{sec:wordorder}).
+The two models reach these results with different components of the same kind at a similar depth (\S\ref{sec:models}).
+Overall, we conclude that the encoders build the two judgements from different kinds of computation, and that neither follows case alone.
+
 \section{Data and Methods}
 \label{sec:methods}
 
@@ -66,13 +121,6 @@ A model has one MLP per block, too few to match, so MLPs are judged separately (
 Intervals are 95\% bootstrap intervals over documents (2,000 resamples) and are descriptive.
 Tests flip the signs of whole documents in 10,000 permutations, so the smallest $p$ is $10^{-4}$.
 Tests of what the components read use documents in neither half.
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig1_design.pdf}
-  \caption{The two tasks. In each panel the clean run (top) is the sentence as written, and the corrupted run (bottom) is its reordering (a) or the sentence with the object masked (b). Patching copies one component's output from the clean into the corrupted run. The agreement sentence is constructed. ERG: ergative; f, m: feminine, masculine.}
-  \label{fig:design}
-\end{figure*}
 
 
 \section{Results}

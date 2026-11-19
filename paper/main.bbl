@@ -1,4 +1,4 @@
-\begin{thebibliography}{8}
+\begin{thebibliography}{14}
 \providecommand{\natexlab}[1]{#1}
 
 \bibitem[{Bhatt et~al.(2009)Bhatt, Narasimhan, Palmer, Rambow, Sharma, and
@@ -11,6 +11,12 @@ Rajesh Bhatt, Bhuvana Narasimhan, Martha Palmer, Owen Rambow, Dipti Sharma, and
   ({LAW} {III})}, pages 186--189, Suntec, Singapore. Association for
   Computational Linguistics.
 
+\bibitem[{Bock and Miller(1991)}]{bock1991}
+Kathryn Bock and Carol~A. Miller. 1991.
+\newblock \href {https://doi.org/10.1016/0010-0285(91)90003-7} {Broken
+  agreement}.
+\newblock \emph{Cognitive Psychology}, 23(1):45--93.
+
 \bibitem[{Conneau et~al.(2020)Conneau, Khandelwal, Goyal, Chaudhary, Wenzek,
   Guzm{\'a}n, Grave, Ott, Zettlemoyer, and Stoyanov}]{conneau2020}
 Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume
@@ -21,6 +27,26 @@ Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume
 \newblock In \emph{Proceedings of the 58th Annual Meeting of the Association
   for Computational Linguistics}, pages 8440--8451, Online. Association for
   Computational Linguistics.
+
+\bibitem[{Ferrando and Costa-juss{\`a}(2024)}]{ferrando2024}
+Javier Ferrando and Marta~R. Costa-juss{\`a}. 2024.
+\newblock \href {https://doi.org/10.18653/v1/2024.findings-emnlp.591} {On the
+  similarity of circuits across languages: a case study on the subject-verb
+  agreement task}.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  EMNLP 2024}, pages 10115--10125, Miami, Florida, USA. Association for
+  Computational Linguistics.
+
+\bibitem[{Finlayson et~al.(2021)Finlayson, Mueller, Gehrmann, Shieber, Linzen,
+  and Belinkov}]{finlayson2021}
+Matthew Finlayson, Aaron Mueller, Sebastian Gehrmann, Stuart Shieber, Tal
+  Linzen, and Yonatan Belinkov. 2021.
+\newblock \href {https://doi.org/10.18653/v1/2021.acl-long.144} {Causal
+  analysis of syntactic agreement mechanisms in neural language models}.
+\newblock In \emph{Proceedings of the 59th Annual Meeting of the Association
+  for Computational Linguistics and the 11th International Joint Conference on
+  Natural Language Processing (Volume 1: Long Papers)}, pages 1828--1843,
+  Online. Association for Computational Linguistics.
 
 \bibitem[{Kauf and Ivanova(2023)}]{kauf2023}
 Carina Kauf and Anna~A. Ivanova. 2023.
@@ -40,10 +66,31 @@ Simran Khanuja, Diksha Bansal, Sarvesh Mehtani, Savya Khosla, Atreyee Dey,
 \newblock {MuRIL}: Multilingual representations for {I}ndian languages.
 \newblock \emph{arXiv preprint arXiv:2103.10730}.
 
+\bibitem[{Linzen et~al.(2016)Linzen, Dupoux, and Goldberg}]{linzen2016}
+Tal Linzen, Emmanuel Dupoux, and Yoav Goldberg. 2016.
+\newblock \href {https://doi.org/10.1162/tacl_a_00115} {Assessing the ability
+  of {LSTM}s to learn syntax-sensitive dependencies}.
+\newblock \emph{Transactions of the Association for Computational Linguistics},
+  4:521--535.
+
 \bibitem[{Mohanan(1994)}]{mohanan1994}
 Tara Mohanan. 1994.
 \newblock \emph{Argument Structure in {H}indi}.
 \newblock CSLI Publications, Stanford, CA.
+
+\bibitem[{Mueller et~al.(2022)Mueller, Xia, and Linzen}]{mueller2022}
+Aaron Mueller, Yu~Xia, and Tal Linzen. 2022.
+\newblock \href {https://doi.org/10.18653/v1/2022.conll-1.8} {Causal analysis
+  of syntactic agreement neurons in multilingual language models}.
+\newblock In \emph{Proceedings of the 26th Conference on Computational Natural
+  Language Learning (CoNLL)}, pages 95--109, Abu Dhabi, United Arab Emirates
+  (Hybrid). Association for Computational Linguistics.
+
+\bibitem[{Ranjan et~al.(2022)Ranjan, Rajkumar, and Agarwal}]{ranjan2022}
+Sidharth Ranjan, Rajakrishnan Rajkumar, and Sumeet Agarwal. 2022.
+\newblock \href {https://doi.org/10.1016/j.cognition.2021.104959} {Locality and
+  expectation effects in {H}indi preverbal constituent ordering}.
+\newblock \emph{Cognition}, 223:104959.
 
 \bibitem[{Syed et~al.(2024)Syed, Rager, and Conmy}]{syed2024}
 Aaquib Syed, Can Rager, and Arthur Conmy. 2024.
