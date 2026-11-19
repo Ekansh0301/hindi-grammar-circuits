@@ -178,7 +178,7 @@ def fig2():
             off = -0.04 if m == "muril" else 0.04
             xs = np.arange(4) + off
             b.errorbar(xs, y, yerr=[np.array(y) - lo, np.array(hi) - y], color=C_MODEL[m], ls=ls, lw=0.9, marker="o" if t == "object" else "s",
-                       ms=2.6, mfc=C_MODEL[m] if t == "object" else "white", capsize=1.2, elinewidth=0.6)
+                       ms=2.6, mfc="white", capsize=1.2, elinewidth=0.6)
     b.set_xticks(range(4))
     b.set_xticklabels([str(k) for k in Ks], fontsize=6)
     b.set_xlabel("top K heads", fontsize=6.3, labelpad=1)
@@ -248,7 +248,7 @@ def fig3():
                        ls=ls, lw=0.8, marker=mkr, ms=2.8, mfc=C_MODEL[m] if cls == "SOV" else "white", capsize=1.2, elinewidth=0.6)
     c.axhline(0, color="#999999", lw=0.5)
     c.set_xticks(range(3))
-    c.set_xticklabels(["none", "bare\nnoun", "ne-marked\nnoun"], fontsize=6)
+    c.set_xticklabels(["no noun\nmasked", "bare\nnoun", "ne-marked\nnoun"], fontsize=6)
     c.set_xlim(-0.4, 2.4)
     style(c)
     from matplotlib.lines import Line2D
@@ -298,6 +298,8 @@ def fig4():
     a.set_ylim(-0.6, 1.6)
     a.set_xlabel("gap kept after the control minus\nafter the markers (bits)", fontsize=6.0, labelpad=1)
     style(a)
+    from matplotlib.lines import Line2D as _L
+    a.legend(handles=[_L([], [], marker="o", ls="", color=C_MODEL["muril"], ms=3, label="MuRIL"), _L([], [], marker="s", ls="", color=C_MODEL["xlmrlarge"], ms=3, label="XLM-R")], fontsize=5.4, frameon=False, loc="lower right", handletextpad=0.2, borderaxespad=0.1)
     for ax, m, ttl in ((b, "muril", "(b) MuRIL"), (c, "xlmrlarge", "(c) XLM-R-large")):
         rows_ = N.read_csv(N.OUT / f"cues_{m}.csv")
         gap = N.col(rows_, "gap")
