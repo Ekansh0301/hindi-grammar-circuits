@@ -13,14 +13,17 @@ case-marked role of each noun, or cues such as position and how object-like a no
 
 ## Main results
 
-- **Agreement runs through a small set of late attention heads.** Patching the ten leading heads restores 0.90 (MuRIL) and
-  0.78 (XLM-R-large) of the agreement margin, and removing them removes about all of it.
-- **Word order does not.** Its leading heads are sufficient but not necessary. The upper MLPs carry most of the preference.
-- **Agreement respects the case rule at its boundary.** When the object takes *को* (ko), the verb falls back to the default
-  form in 68% to 75% of the sentences, depending on the model.
-- **Agreement does not simply follow the case-marked role.** When the two noun phrases swap places, both models still
-  prefer the verb form that agrees with the old object.
-- **The two models use different components of the same kind** (late heads, upper MLPs) at a similar relative depth.
+- **Agreement has a circuit.** Ten attention heads, mostly in the upper layers, read the object. Patching them restores 0.90
+  (MuRIL) and 0.78 (XLM-R-large) of the agreement margin, and ablating them removes 0.97 and 1.08 of it.
+- **Word order has a crowd.** Sets of heads or sets of upper MLPs each restore the preference, and removing either leaves most of it.
+- **Agreement respects the case rule at its boundary.** An object that takes *को* (ko) stops controlling the verb in 68% to 75%
+  of the sentences, depending on the model.
+- **Agreement does not follow the case-marked role alone.** When the two noun phrases swap places, both models mostly still prefer
+  the verb form that agrees with the old object.
+- **Word order is not shown to depend on case markers,** and n-gram statistics do not fully account for it.
+- **The two models use different components,** in the upper layers.
+
+The paper is in [`paper/main.pdf`](paper/main.pdf).
 
 Every number and its run record are listed in [`course_runs/README.md`](course_runs/README.md).
 

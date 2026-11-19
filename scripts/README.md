@@ -24,7 +24,8 @@ command, library versions, output checksums).
 | `mi_paper_cues.py`, `mi_paper_cues_gap.py` | word-order preference by n-gram cue, and the circuit's effect given the gap | CPU |
 | `mi_figures.py`, `mi_figures_followup.py` | figures from the outputs | CPU, matplotlib |
 | `mi_paper_numbers.py` | recomputes the paper's Results numbers from `course_runs/outputs` and writes `paper_numbers.json` | CPU, numpy |
-| `mi_figures_paper.py` | paper figures 1 to 4 (`paper/figures/`) | CPU, matplotlib |
+| `mi_figures_paper.py` | paper figures (`paper/figures/`) | CPU, matplotlib |
+| `mi_paper_tables.py` | appendix tables (`paper/tables/`) from the run records and `paper_numbers.json` | CPU, numpy |
 
 ## Running
 
