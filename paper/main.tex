@@ -9,14 +9,29 @@
 \usepackage{inconsolata}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{booktabs}
 
-\title{Where Do Multilingual Encoders Compute Hindi Grammar?}
+\title{Agreement Has a Circuit, Word Order Has a Crowd:\\Hindi Grammar in Two Multilingual Encoders}
 
 \author{Ekansh Goyal \and Varun Gupta \\
   International Institute of Information Technology, Hyderabad}
 
 \begin{document}
 \maketitle
+
+\begin{abstract}
+A Hindi verb agrees with the bare object when the subject takes the marker \emph{ne}, and the phrases before it can appear in many orders.
+We ask how two multilingual encoders, MuRIL and XLM-R-large, make the two judgements that follow: which verb form is correct, and which of a sentence and its reordering was written.
+Earlier mechanistic studies of agreement let the subject control the verb, so they could not tell whether components follow grammatical roles.
+We patch and ablate attention heads and MLPs, choosing them on one half of the documents and testing them on the other, and we edit sentences to separate case, plausibility, position and n-gram accounts.
+Agreement runs through ten late heads that read the object, and removing them removes the preference.
+Word order is redundant: sets of heads or of late MLPs each restore it, and removing either leaves most of it.
+A \emph{ko}-marked object loses the verb, but after the two noun phrases swap places both models still agree with the old object.
+Word order is not shown to depend on case markers.
+The two encoders use different components of the same kind at a similar depth.
+Code: \url{https://github.com/Ekansh0301/hindi-grammar-circuits}.
+\end{abstract}
+
 
 \begin{figure*}[t]
   \centering
@@ -69,7 +84,7 @@ First, agreement runs through a compact set of late attention heads that read th
 Word order is redundant: sets of heads or of late MLPs each restore the preference, and removing either leaves most of it (\S\ref{sec:components}, \S\ref{sec:redundancy}).
 Second, agreement respects the case rule at its edge, since a \emph{ko}-marked object loses the verb.
 But it does not follow the case-marked role: after the two noun phrases swap places, both models still agree with the old object (\S\ref{sec:swap}).
-Third, word order is not shown to be read through case markers, and n-gram statistics do not account for it (\S\ref{sec:wordorder}).
+Third, word order is not shown to be read through case markers, and n-gram statistics do not fully account for it (\S\ref{sec:wordorder}).
 The two models reach these results with different components of the same kind at a similar depth (\S\ref{sec:models}).
 Overall, we conclude that the encoders build the two judgements from different kinds of computation, and that neither follows case alone.
 
@@ -266,7 +281,7 @@ Given the gap, the interval of the cue's coefficient lies within $\pm0.11$ bits 
 Reordering size does not settle the question.
 The top ten heads restore a flat or slightly rising share of the gap from single swaps to four or more (by 0.03 [$-0.09$, 0.15] and 0.02 [$-0.11$, 0.13]).
 The intervals are wider than the $\pm0.10$ band we set for calling it size-independent, so the result is inconclusive (Appendix~\ref{app:wordorder}).
-Word order is not shown to be read through case markers, and n-gram statistics do not account for it.
+Word order is not shown to be read through case markers, and n-gram statistics do not fully account for it.
 
 \subsection{The two models}
 \label{sec:models}
@@ -309,7 +324,7 @@ Our corruption finds a small set of late heads in two encoders.
 The two results differ in corruption, model and language, so they do not conflict.
 
 \paragraph{What word order reads.}
-We find no marker or n-gram account of the preference.
+We find no marker account of the preference and no complete n-gram account.
 Deleting the moved phrases' markers costs no more than deleting other words.
 The n-gram cue explains part of the gap, but the circuit's effect follows the gap.
 Reordering size is inconclusive (Section~\ref{sec:wordorder}).
@@ -330,6 +345,304 @@ MuRIL's score falls by 1.75 bits when the subject stands between the object and 
 The fall comes from how the other words are rescored ($-1.81$ bits, Appendix~\ref{app:subject}).
 For a masked encoder, a score over the whole sentence mixes the verb's choice with the rescoring of its neighbours.
 
+\section{Conclusion}
+\label{sec:conclusion}
+
+We asked how MuRIL and XLM-R-large judge Hindi word order and agreement, and what the components behind each judgement read.
+Agreement runs through ten late heads that read the object, and removing them removes the preference.
+Word order is redundant, because sets of heads or of late MLPs each restore it and removing either leaves most of it.
+A ko-marked object loses the verb, but after the two noun phrases swap places both models still agree with the old object, so agreement respects the case rule at its edge without following the case-marked role.
+Word order is not shown to depend on case markers, and n-gram statistics explain only part of it.
+The two encoders reach these results with different components of the same kind at a similar depth.
+For interpretability, a set of components that restores a judgement is not yet a circuit, and a whole-sentence score can hide where an effect lies.
+Which cues the redundant word-order components combine is still to be found.
+
+\section*{Limitations}
+
+\paragraph{Scoring.}
+Scores are pseudo-log-likelihoods of masked encoders, not probabilities of a sentence, and we did not vary the rule for words split into subtokens.
+Repeating the analysis with a second scoring rule would show whether the findings depend on it.
+
+\paragraph{Corruption and ablation.}
+Masking the object removes every cue it carries, not only its gender and number, and a masked phrase is rare in training.
+The heads we find carry the object's features to the verb, and another corruption would find other components \citep{zhang2024}.
+The swap tests use whole sentences, but there the ten heads' faithfulness cannot be estimated, because the mean gap is under one bit.
+Mean ablation is one of several ways to switch a component off, and zero ablation was checked only for head sets.
+Searching under a corruption that replaces the object with another noun, and ablating by resampling, would test both.
+
+\paragraph{Evidence level.}
+Attention is descriptive.
+Path patching sends the effect through the object, but the subject is the same in both runs, so a null effect there holds by construction.
+The MLP evidence is per block, with no matched random sets and no search for completeness.
+For word order, the exact stage ranked 60 heads per model, the 30 the screen scored highest and 30 matched heads, so the top-$K$ sets for $K>10$ are drawn from that pool.
+We did not test which components compensate when the ten heads are removed.
+Neuron-level analysis and a ranking of all heads would address these.
+
+\paragraph{Tests.}
+The reordering-size test is inconclusive and needs more pairs.
+The control matched in kind lies farther from the moved phrases, and its words are far more often genitives (Appendix~\ref{app:wordorder}); the control matched in string and place has 17 pairs.
+Deleting \emph{ne} makes the sentence ungrammatical, so a fall in the margin was expected, and swapped sentences are odd in meaning.
+For MuRIL, the span margin failed the screening rule we set, and we used it under a recorded override.
+We dropped the planned attraction contrast as a circuit task, because it shows no gap in XLM-R-large.
+The halves swap reads both halves again, so it tests stability, not independent confirmation.
+
+\paragraph{Scope.}
+We study two encoders, one language, one news treebank and stand-alone sentences.
+The findings may not carry to other case-marking languages, to larger models or to running text.
+We do not redistribute the treebank text, so rebuilding the items needs its release.
+
+\section*{Ethics Statement}
+The sentences come from the Hindi-Urdu Treebank, a published corpus of news text annotated by others.
+We collected no new data and involved no human participants.
+The treebank release states no terms for redistribution, so we publish identifiers, model scores and code, and not its text or our reorderings.
+Both models are public checkpoints used under their licences (Apache-2.0 for MuRIL, MIT for XLM-R-large).
+Code and run records are at \url{https://github.com/Ekansh0301/hindi-grammar-circuits}.
+Finding the components behind a judgement does not show that a model processes language as people do.
+
 \bibliography{custom}
+
+\appendix
+
+\section{Data and splits}
+\label{app:data}
+Table~\ref{tab:splits} gives the items behind each result.
+Step~4 items are split by document.
+The fresh sets contain documents in neither half.
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+Items & Used for & Size & Docs \\
+\midrule
+\multicolumn{4}{@{}l}{Agreement orders} \\
+Selection half & choose components & 388 & 46 \\
+Held-out half & validate & 351 & 45 \\
+Fresh, drawn & head and MLP sets & 400 & 112 \\
+Fresh, entering & \emph{ko} test & 956 & 118 \\
+Fresh, entering & swap, masked slot & 2,132 & --- \\
+\midrule
+\multicolumn{4}{@{}l}{Word-order pairs} \\
+Selection half & choose components & 146 & 124 \\
+Held-out half & validate & 154 & 124 \\
+Fresh, drawn & head and MLP sets & 300 & 241 \\
+Fresh, all & size, cues & 471 & 334 \\
+\bottomrule
+\end{tabular}
+\caption{Items per split and use. Fresh items come from documents in neither half. The marker tests use the pairs that contain a marker: 223, 131 and 17 pairs for the three controls.}
+\label{tab:splits}
+\end{table}
+
+\section{Attention and path patching of the leading heads}
+\label{app:heads}
+Table~\ref{tab:heads} adds what the five leading agreement heads attend to and which positions carry their effect.
+The subject and \emph{ne} rows are near zero in path patching because both runs share the subject and \emph{ne}, so this holds by construction and is not evidence about case.
+
+\begin{table*}[!ht]
+\centering
+\small
+\begin{tabular}{@{}llcccccccc@{}}
+\toprule
+ & & \multicolumn{3}{c}{Attention from the verb to} & \multicolumn{4}{c}{Gap restored through the keys and values at} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-9}
+Model & Head & object & subject & \emph{ne} & object & subject & \emph{ne} & all positions \\
+\midrule
+MuRIL & L10H6 & 0.60 & 0.01 & 0.01 & 0.23 & 0.00 & 0.00 & 0.28 \\
+ & L8H3 & 0.58 & 0.03 & 0.11 & 0.29 & 0.00 & 0.00 & 0.32 \\
+ & L11H1 & 0.42 & 0.02 & 0.03 & 0.09 & 0.00 & 0.00 & 0.13 \\
+ & L9H6 & 0.31 & 0.01 & 0.02 & 0.04 & 0.00 & 0.00 & 0.08 \\
+ & L11H2 & 0.28 & 0.03 & 0.05 & 0.03 & 0.00 & 0.00 & 0.05 \\
+XLM-R-large & L21H0 & 0.52 & 0.01 & 0.00 & 0.23 & 0.00 & 0.00 & 0.31 \\
+ & L20H0 & 0.73 & 0.01 & 0.01 & 0.20 & 0.00 & 0.00 & 0.23 \\
+ & L20H2 & 0.45 & 0.01 & 0.07 & 0.07 & 0.00 & 0.00 & 0.10 \\
+ & L22H6 & 0.26 & 0.02 & 0.09 & 0.04 & 0.00 & 0.00 & 0.07 \\
+ & L19H3 & 0.26 & 0.03 & 0.07 & 0.04 & 0.00 & 0.00 & 0.04 \\
+\bottomrule
+\end{tabular}
+\caption{The five leading agreement heads. Attention is the mean share of the verb span's attention over 52 clauses, renormalised over real subtokens. The path columns are shares of the gap restored by patching only that head's keys and values from the clean run.}
+\label{tab:heads}
+\end{table*}
+
+\section{Halves exchanged}
+\label{app:halves}
+Table~\ref{tab:halves} repeats the head and MLP selection with the two halves trading roles.
+Faithfulness replicates in all four cells.
+XLM-R-large word-order necessity does not (0.09 in the main analysis, 0.02 when the halves trade roles, $p=0.93$), so we do not read that value as necessity.
+
+\begin{table}[!ht]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+ & & \multicolumn{2}{c}{Faithfulness} & \multicolumn{2}{c}{Necessity} & Shared \\
+Task & Model & main & swap & main & swap & heads / MLPs \\
+\midrule
+Agr. & MuRIL & 0.90 & 0.83 & 0.97 & 0.94 & 8 / 5 \\
+ & XLM-R & 0.78 & 0.74 & 1.08 & 1.01 & 7 / 5 \\
+Order & MuRIL & 0.78 & 0.78 & 0.06 & 0.07 & 7 / 5 \\
+ & XLM-R & 0.53 & 0.53 & 0.09 & 0.02 & 5 / 5 \\
+\bottomrule
+\end{tabular}
+\caption{Top ten heads chosen on the selection half and measured on the held-out half (main), and the reverse (swap). Shared: heads in both top-ten lists, and MLPs in both top-five lists.}
+\label{tab:halves}
+\end{table}
+
+\section{Head sets, MLP sets and ablation}
+\label{app:sets}
+Table~\ref{tab:setsize} gives the head-set sizes behind Figure~\ref{fig:components}b, with zero ablation and the language-modelling cost of mean ablation.
+Table~\ref{tab:mlpsets} compares the top five MLPs with all other sets of five.
+MuRIL's agreement necessity is not read, because ablating its top five MLPs costs 5.0 nats, above the 2-nat limit.
+
+\begin{table*}[!ht]
+\centering
+\small
+\begin{tabular}{@{}llcccccccc@{}}
+\toprule
+ & & \multicolumn{4}{c}{Faithfulness at $K=$} & \multicolumn{4}{c}{Necessity (mean ablation) at $K=$} \\
+\cmidrule(lr){3-6}\cmidrule(lr){7-10}
+Task & Model & 5 & 10 & 20 & 40 & 5 & 10 & 20 & 40 \\
+\midrule
+Agr. & MuRIL & 0.74 & 0.85 & 0.94 & 0.97 & 0.75 & 0.94 & 1.00 & 1.03 \\
+ & XLM-R & 0.66 & 0.69 & 0.74 & 0.80 & 0.87 & 0.89 & 0.93 & 0.97 \\
+Order & MuRIL & 0.47 & 0.71 & 0.98 & 1.01 & 0.07 & 0.09 & 0.10 & 0.19 \\
+ & XLM-R & 0.30 & 0.48 & 0.70 & 0.84 & 0.06 & 0.08 & 0.09 & 0.07 \\
+\midrule
+ & & \multicolumn{4}{c}{Zero-ablation necessity} & \multicolumn{4}{c}{Language-modelling cost, nats} \\
+ & & \multicolumn{2}{c}{$K=10$} & \multicolumn{2}{c}{$K=40$} & \multicolumn{2}{c}{$K=10$} & \multicolumn{2}{c}{$K=40$} \\
+\midrule
+Agr. & MuRIL & \multicolumn{2}{c}{0.91} & \multicolumn{2}{c}{1.03} & \multicolumn{2}{c}{0.21} & \multicolumn{2}{c}{0.85} \\
+ & XLM-R & \multicolumn{2}{c}{0.80} & \multicolumn{2}{c}{0.87} & \multicolumn{2}{c}{0.06} & \multicolumn{2}{c}{0.27} \\
+Order & MuRIL & \multicolumn{2}{c}{0.03} & \multicolumn{2}{c}{0.03} & \multicolumn{2}{c}{0.08} & \multicolumn{2}{c}{1.61} \\
+ & XLM-R & \multicolumn{2}{c}{$-0.01$} & \multicolumn{2}{c}{$-0.04$} & \multicolumn{2}{c}{0.05} & \multicolumn{2}{c}{0.43} \\
+\bottomrule
+\end{tabular}
+\caption{Top-$K$ heads on fresh documents. In word order the sets are drawn from the 60 heads the exact stage ranked. The cost is held-out nats per subtoken above the unablated model.}
+\label{tab:setsize}
+\end{table*}
+
+\begin{table*}[!ht]
+\centering
+\small
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+ & & \multicolumn{3}{c}{Faithfulness} & \multicolumn{3}{c}{Necessity} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+Task & Model & top five & other sets, mean & rank & top five & other sets, mean & rank \\
+\midrule
+Agr. & MuRIL & 0.76 [0.71, 0.81] & 0.55 & 11 of 792 & --- & --- & --- \\
+ & XLM-R & 0.64 [0.60, 0.69] & 0.42 & 1 of 256 & 0.83 [0.75, 0.91] & 0.65 & 3 \\
+Order & MuRIL & 0.98 [0.94, 1.01] & 0.84 & 3 of 792 & 0.32 [0.22, 0.41] & 0.42 & 52 \\
+ & XLM-R & 0.79 [0.74, 0.84] & 0.63 & 15 of 256 & 0.16 [0.08, 0.23] & $-0.01$ & 3 \\
+\bottomrule
+\end{tabular}
+\caption{The frozen top five MLPs against all other sets of five (791 in MuRIL, 255 in XLM-R-large) on fresh documents, with 95\% document-bootstrap intervals. Rank counts the other sets that do better, plus one.}
+\label{tab:mlpsets}
+\end{table*}
+
+\section{Word-order tests}
+\label{app:wordorder}
+
+\paragraph{Marker control.}
+The control that deletes distant postpositions is farther from the moved phrases than the markers are, and it differs in kind.
+The deleted words lie 8.9 words from the nearest moved head word on average, against 1.1 for the markers, and 46\% of them are genitives (\emph{ka}, \emph{ki}, \emph{ke}), against 6\% of the markers.
+Table~\ref{tab:kind} gives both controls.
+The control matched in string and place has only 17 pairs, so its result is inconclusive.
+
+\begin{table*}[!ht]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Control & Pairs & MuRIL & XLM-R \\
+\midrule
+Other words & 223 & 0.04 [$-0.05$, 0.15] & 0.05 [$-0.03$, 0.14] \\
+Distant postpositions & 131 & 0.00 [$-0.12$, 0.12] & $-0.03$ [$-0.11$, 0.06] \\
+Same strings and place & 17 & $-0.21$ [$-0.47$, 0.01] & 0.02 [$-0.17$, 0.23] \\
+\bottomrule
+\end{tabular}
+\caption{Gap kept after deleting the control words minus gap kept after deleting the moved phrases' markers, in bits, with 95\% document-bootstrap intervals. Positive means deleting the markers costs more.}
+\label{tab:kind}
+\end{table*}
+
+\paragraph{Cue strata.}
+Table~\ref{tab:cues} splits the 471 fresh pairs by whether the n-gram cue favours the written or the reordered sentence.
+Where it favours the reordered sentence, the gap is smaller and the share of it that the ten heads restore is higher.
+Our declared rule read this as cue dependence in XLM-R-large and left MuRIL inconclusive.
+A regression of the effect in bits on the gap and the stratum, run after the results were read, puts the stratum's coefficient, for the primary cue, within $\pm0.11$ bits of zero in both models and for both circuit parts.
+So the higher share follows from the smaller gap.
+
+\begin{table}[!ht]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Model & Cue favours & Pairs & Written & Gap & Heads \\
+\midrule
+MuRIL & written & 410 & 82.7 & 0.68 & 0.70 \\
+ & reordered & 60 & 61.7 & 0.16 & 0.90 \\
+XLM-R & written & 410 & 83.2 & 0.54 & 0.47 \\
+ & reordered & 60 & 61.7 & 0.17 & 0.79 \\
+\bottomrule
+\end{tabular}
+\caption{Pairs by n-gram cue. Written: percent of pairs where the model prefers the written order. Gap: mean gap in bits. Heads: share of the gap the ten heads restore, over pairs above the gap floor.}
+\label{tab:cues}
+\end{table}
+
+\paragraph{Reordering size.}
+Table~\ref{tab:size} gives the ten heads' share by the number of phrases moved.
+The share of four or more minus that of one is $+0.03$ [$-0.09$, 0.15] in MuRIL and $+0.02$ [$-0.11$, 0.13] in XLM-R-large, outside the $\pm0.10$ band we set for calling the share size-independent, so the result is inconclusive.
+
+\begin{table}[!ht]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & & \multicolumn{2}{c}{MuRIL} & \multicolumn{2}{c}{XLM-R} \\
+Moves & Pairs & gap & share & gap & share \\
+\midrule
+1 & 209 & 0.41 & 0.71 & 0.35 & 0.49 \\
+2--3 & 152 & 0.88 & 0.69 & 0.75 & 0.47 \\
+4 or more & 110 & 0.96 & 0.74 & 0.73 & 0.51 \\
+\bottomrule
+\end{tabular}
+\caption{Mean gap (bits) and share of it restored by the ten heads, by the number of phrase moves.}
+\label{tab:size}
+\end{table}
+
+\section{The intervening subject}
+\label{app:subject}
+A whole-sentence agreement score of MuRIL falls by 1.75 bits when the subject stands between the object and the verb (OSV-type minus SOV-type orders, matched on gap, 102 clauses, $p=10^{-4}$).
+At the agreeing words, scored as one chain, the same contrast is $-0.05$ bits ($p=0.80$) in MuRIL and $+0.16$ bits ($p=0.26$) in XLM-R-large.
+Table~\ref{tab:subject} splits the whole-sentence score by word class.
+Most of the fall lies in the words other than the verb, the object, the subject and \emph{ne}.
+The subject phrase moves the other way in both models, so in XLM-R-large the two parts nearly cancel.
+The agreeing-word row here scores each sentence on its own, and so differs slightly from the one-chain value above.
+
+\begin{table}[!ht]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Part of the score & MuRIL & XLM-R \\
+\midrule
+Whole sentence & $-1.75$ & $-0.21$ \\
+Agreeing words & $-0.23$ & $+0.09$ \\
+Rest of verb & $+0.15$ & $-0.09$ \\
+Object & $-0.45$ & $-0.11$ \\
+Subject & $+0.48$ & $+0.75$ \\
+\emph{ne} & $+0.12$ & $-0.03$ \\
+Other words & $-1.81$ & $-0.82$ \\
+\bottomrule
+\end{tabular}
+\caption{Contrast between OSV-type and SOV-type orders, in bits, by word class. The class rows sum to the whole sentence. Sign-flip $p\le0.0002$ for MuRIL's whole sentence, subject and other words and for XLM-R-large's subject and other words; MuRIL's object has $p=0.018$ and \emph{ne} $p=0.044$, and the other rows $p>0.1$.}
+\label{tab:subject}
+\end{table}
+
 
 \end{document}
