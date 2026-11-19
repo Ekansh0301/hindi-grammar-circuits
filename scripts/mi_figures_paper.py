@@ -337,9 +337,95 @@ def fig1():
     plt.close(fig)
 
 
+def _rows(path, ncols):
+    """Table rows of a run record as lists of cells (numbers kept as text)."""
+    rows = []
+    for line in path.read_text().splitlines():
+        if line.startswith("|") and not line.startswith("|---"):
+            rows.append([c.strip() for c in line.strip().strip("|").split("|")])
+    return rows
+
+
+def fig_heads():
+    """The top five agreement heads: attention from the verb to the object, and the gap restored through the object."""
+    rec = ROOT / "course_runs" / "records"
+    heads, att, via_obj, via_all, model_of = [], [], [], [], []
+    for m in N.MODELS:
+        a = {r[0]: float(r[2]) for r in _rows(rec / f"mi_attention_{m}.md", 6) if len(r) == 6 and r[1] == "object" and r[0] != "all"}
+        p = {r[0]: (float(r[1]), float(r[4])) for r in _rows(rec / f"mi_path_{m}.md", 6) if len(r) == 6 and r[0].startswith("L")}
+        for h in p:
+            heads.append(h); att.append(a[h]); via_obj.append(p[h][0]); via_all.append(p[h][1]); model_of.append(m)
+    n = len(heads)
+    ypos = [i if i < 5 else i + 0.8 for i in range(n)]
+    fig = plt.figure(figsize=(3.3, 2.35))
+    a = fig.add_axes([0.20, 0.19, 0.36, 0.67])
+    b = fig.add_axes([0.66, 0.19, 0.32, 0.67])
+    for ax in (a, b):
+        style(ax)
+        ax.set_ylim(max(ypos) + 0.7, -0.7)
+    a.set_yticks(ypos)
+    a.set_yticklabels(heads, fontsize=7)
+    b.set_yticks([])
+    for y, m, v in zip(ypos, model_of, att):
+        a.barh(y, v, height=0.7, color=C_MODEL[m])
+    for y, m, v, w in zip(ypos, model_of, via_obj, via_all):
+        b.barh(y, w, height=0.7, color="#d9d9d9")
+        b.barh(y, v, height=0.7, color=C_MODEL[m])
+    a.set_xlim(0, 0.8)
+    b.set_xlim(0, 0.35)
+    a.set_title("(a) Attention to object", loc="left", fontsize=7.2, fontweight="bold", pad=2)
+    b.set_title("(b) Gap restored", loc="left", fontsize=7.2, fontweight="bold", pad=2)
+    a.set_xlabel("share of the verb's attention", fontsize=6.8, labelpad=1)
+    b.set_xlabel("share of the gap", fontsize=6.8, labelpad=1)
+    a.text(0.0, ypos[2], "MuRIL", fontsize=6.4, color=C_MODEL["muril"], ha="right", va="center", rotation=90,
+           transform=a.get_yaxis_transform(), x=-0.30) if False else None
+    b.text(0.99, ypos[4] + 0.25, "at the object", fontsize=6.4, ha="right", va="bottom", color=DARK, transform=b.get_yaxis_transform()) if False else None
+    from matplotlib.patches import Patch
+    fig.legend(handles=[Patch(color=C_MODEL["muril"], label="MuRIL"), Patch(color=C_MODEL["xlmrlarge"], label="XLM-R-large"),
+                        Patch(color="#d9d9d9", label="light grey: at all positions")],
+               loc="upper center", ncol=3, fontsize=6.4, frameon=False, bbox_to_anchor=(0.5, 1.02), handletextpad=0.4,
+               columnspacing=0.9, handlelength=1.0)
+    OUT.mkdir(parents=True, exist_ok=True)
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig_heads.{ext}", dpi=300 if ext == "png" else None)
+    plt.close(fig)
+
+
+def fig_subject():
+    """Where the intervening-subject contrast lies: OSV-type minus SOV-type orders, by word class."""
+    rec = ROOT / "course_runs" / "records"
+    names = [("A", "Whole sentence"), ("A_agree", "Agreeing words"), ("A_verb", "Rest of verb"), ("A_object", "Object"),
+             ("A_subject", "Subject"), ("A_ne", "ne"), ("A_other", "Other words")]
+    val = {}
+    for m in N.MODELS:
+        d = {r[0]: float(r[3]) for r in _rows(rec / f"mi_decompose_{m}.md", 5) if len(r) == 5 and r[0] in dict(names)}
+        val[m] = [d[k] for k, _ in names]
+    fig = plt.figure(figsize=(3.3, 2.1))
+    ax = fig.add_axes([0.31, 0.19, 0.66, 0.72])
+    style(ax)
+    y = np.arange(len(names))
+    for j, m in enumerate(N.MODELS):
+        ax.barh(y + (-0.19 if j == 0 else 0.19), val[m], height=0.36, color=C_MODEL[m],
+                label="MuRIL" if m == "muril" else "XLM-R-large")
+    ax.axvline(0, color="#444444", lw=0.6)
+    ax.axhline(0.5, color="#bbbbbb", lw=0.5, ls=":")
+    ax.set_yticks(y)
+    ax.set_yticklabels([n for _, n in names], fontsize=6.8)
+    ax.set_ylim(len(names) - 0.5, -0.5)
+    ax.set_xlabel("OSV-type minus SOV-type orders (bits)", fontsize=6.8, labelpad=1)
+    
+    fig.legend(*ax.get_legend_handles_labels(), loc="upper center", ncol=2, fontsize=6.4, frameon=False, bbox_to_anchor=(0.62, 1.02), handlelength=1.0)
+    OUT.mkdir(parents=True, exist_ok=True)
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig_subject.{ext}", dpi=300 if ext == "png" else None)
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     fig1()
     fig2()
     fig3()
     fig4()
+    fig_heads()
+    fig_subject()
     print("wrote figures in", OUT)
