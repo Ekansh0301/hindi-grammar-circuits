@@ -499,16 +499,7 @@ Table~\ref{tab:mlpsets} compares the top five MLPs with the other sets of five (
 \centering
 \footnotesize
 \setlength{\tabcolsep}{1.5pt}
-\begin{tabular}{@{}llcccc@{}}
-\toprule
-Task & Model & $K=5$ & $K=10$ & $K=20$ & $K=40$ \\
-\midrule
-Agr. & MuRIL & 0.74 / 0.75 & 0.85 / 0.94 & 0.94 / 1.00 & 0.97 / 1.03 \\
- & XLM-R & 0.66 / 0.87 & 0.69 / 0.89 & 0.74 / 0.93 & 0.80 / 0.97 \\
-Order & MuRIL & 0.47 / 0.07 & 0.71 / 0.09 & 0.98 / 0.10 & 1.01 / 0.19 \\
- & XLM-R & 0.30 / 0.06 & 0.48 / 0.08 & 0.70 / 0.09 & 0.84 / 0.07 \\
-\bottomrule
-\end{tabular}
+\input{tables/setsize.tex}
 \caption{Faithfulness / necessity (mean ablation) of the top $K$ heads on fresh documents. In word order the sets are drawn from the 60 heads ranked exactly. Random sets: 100 per $K$, 50 at $K=40$.}
 \label{tab:setsize}
 \end{table}
@@ -517,17 +508,7 @@ Order & MuRIL & 0.47 / 0.07 & 0.71 / 0.09 & 0.98 / 0.10 & 1.01 / 0.19 \\
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llcccc@{}}
-\toprule
- & & \multicolumn{2}{c}{Zero ablation} & \multicolumn{2}{c}{LM cost (nats)} \\
-Task & Model & $K=10$ & $K=40$ & $K=10$ & $K=40$ \\
-\midrule
-Agr. & MuRIL & 0.91 & 1.03 & 0.21 & 0.85 \\
- & XLM-R & 0.80 & 0.87 & 0.06 & 0.27 \\
-Order & MuRIL & 0.03 & 0.03 & 0.08 & 1.61 \\
- & XLM-R & $-0.01$ & $-0.04$ & 0.05 & 0.43 \\
-\bottomrule
-\end{tabular}
+\input{tables/zero.tex}
 \caption{Necessity of the top $K$ heads under zero ablation, and the language-modelling cost of mean ablation (held-out nats per subtoken above the unablated model).}
 \label{tab:zero}
 \end{table}
@@ -536,18 +517,7 @@ Order & MuRIL & 0.03 & 0.03 & 0.08 & 1.61 \\
 \centering
 \footnotesize
 \setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{@{}llccrcc@{}}
-\toprule
- & & \multicolumn{3}{c}{Faithfulness} & \multicolumn{2}{c}{Necessity} \\
-\cmidrule(lr){3-5}\cmidrule(lr){6-7}
-Task & Model & top 5 & others & rank & top 5 & others \\
-\midrule
-Agr. & MuRIL & 0.76 & 0.55 & 11/792 & n/a & n/a \\
- & XLM-R & 0.64 & 0.42 & 1/256 & 0.83 & 0.65 \\
-Order & MuRIL & 0.98 & 0.84 & 3/792 & 0.32 & 0.42 \\
- & XLM-R & 0.79 & 0.63 & 15/256 & 0.16 & $-0.01$ \\
-\bottomrule
-\end{tabular}
+\input{tables/mlpsets.tex}
 \caption{The top five MLPs against the mean of the other sets of five (all in MuRIL, 255 sampled in XLM-R-large), on fresh documents. Rank: the other sets that do better, plus one. MuRIL's agreement necessity is not read, because ablating its top five MLPs costs 5.0 nats, above the 2-nat limit.}
 \label{tab:mlpsets}
 \end{table}
@@ -566,18 +536,7 @@ Its stratum coefficient for the primary cue is $-0.03$ [$-0.11$, 0.06] bits for 
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llrl@{}}
-\toprule
-Control & Model & Pairs & Difference [95\% CI] \\
-\midrule
-Other words & MuRIL & 223 & 0.04 [$-0.05$, 0.15] \\
- & XLM-R & 223 & 0.05 [$-0.03$, 0.14] \\
-Postpositions & MuRIL & 131 & 0.00 [$-0.12$, 0.12] \\
- & XLM-R & 131 & $-0.03$ [$-0.11$, 0.06] \\
-Same strings & MuRIL & 17 & $-0.21$ [$-0.47$, 0.01] \\
- & XLM-R & 17 & 0.02 [$-0.17$, 0.23] \\
-\bottomrule
-\end{tabular}
+\input{tables/kind.tex}
 \caption{Gap kept after deleting the control words minus gap kept after deleting the moved phrases' markers, in bits. Positive: deleting the markers costs more. Postpositions: distant ones; same strings: same strings and place as the markers.}
 \label{tab:kind}
 \end{table}
@@ -586,16 +545,7 @@ Same strings & MuRIL & 17 & $-0.21$ [$-0.47$, 0.01] \\
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llcccc@{}}
-\toprule
-Model & Cue favours & Pairs & Written & Gap & Heads \\
-\midrule
-MuRIL & written & 410 & 82.7 & 0.68 & 0.70 \\
- & reordered & 60 & 61.7 & 0.16 & 0.90 \\
-XLM-R & written & 410 & 83.2 & 0.54 & 0.47 \\
- & reordered & 60 & 61.7 & 0.17 & 0.79 \\
-\bottomrule
-\end{tabular}
+\input{tables/cues.tex}
 \caption{Pairs by n-gram cue. Written: percent of pairs the model orders as written. Gap: mean gap in bits. Heads: share of the gap the ten heads restore.}
 \label{tab:cues}
 \end{table}
@@ -604,16 +554,7 @@ XLM-R & written & 410 & 83.2 & 0.54 & 0.47 \\
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lccccc@{}}
-\toprule
- & & \multicolumn{2}{c}{MuRIL} & \multicolumn{2}{c}{XLM-R} \\
-Moves & Pairs & gap & share & gap & share \\
-\midrule
-1 & 209 & 0.41 & 0.71 & 0.35 & 0.49 \\
-2--3 & 152 & 0.88 & 0.69 & 0.75 & 0.47 \\
-4 or more & 110 & 0.96 & 0.74 & 0.73 & 0.51 \\
-\bottomrule
-\end{tabular}
+\input{tables/size.tex}
 \caption{Mean gap (bits) and share of it the ten heads restore, by the number of phrase moves.}
 \label{tab:size}
 \end{table}
@@ -631,17 +572,7 @@ XLM-R-large word-order necessity does not ($p=0.93$ when swapped), so we do not 
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llccccc@{}}
-\toprule
- & & \multicolumn{2}{c}{Faithfulness} & \multicolumn{2}{c}{Necessity} & Shared \\
-Task & Model & main & swap & main & swap & heads / MLPs \\
-\midrule
-Agr. & MuRIL & 0.90 & 0.83 & 0.97 & 0.94 & 8 / 5 \\
- & XLM-R & 0.78 & 0.74 & 1.08 & 1.01 & 7 / 5 \\
-Order & MuRIL & 0.78 & 0.78 & 0.06 & 0.07 & 7 / 5 \\
- & XLM-R & 0.53 & 0.53 & 0.09 & 0.02 & 5 / 5 \\
-\bottomrule
-\end{tabular}
+\input{tables/halves.tex}
 \caption{Top ten heads chosen on the selection half and measured on the held-out half (main), and the reverse (swap). Shared: heads in both top-ten lists, MLPs in both top-five lists.}
 \label{tab:halves}
 \end{table}
