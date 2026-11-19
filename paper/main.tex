@@ -73,6 +73,40 @@ Third, word order is not shown to be read through case markers, and n-gram stati
 The two models reach these results with different components of the same kind at a similar depth (\S\ref{sec:models}).
 Overall, we conclude that the encoders build the two judgements from different kinds of computation, and that neither follows case alone.
 
+\section{Background}
+\label{sec:background}
+
+\paragraph{Hindi agreement and word order.}
+A Hindi verb agrees with the first argument that has no case marker \citep{mohanan1994}.
+In the past tense of a transitive verb the subject takes \emph{ne}, so the verb agrees with the bare object.
+If the object also takes the marker \emph{ko}, no argument qualifies and the verb shows the default masculine singular form.
+\citet{bhatia2022} studied how Hindi readers process agreement, including attraction.
+Phrases before the verb appear in many orders, and the choice follows locality and expectation \citep{ranjan2022}.
+
+\paragraph{Agreement in models.}
+\citet{finlayson2021} used causal mediation to trace English agreement to neurons in GPT-2, Transformer-XL and XLNet.
+They found different neurons and layers when subject and verb are adjacent or separated.
+Their interventions on attention heads gave effects close to zero, which they took to be possible noise.
+\citet{mueller2022} repeated the analysis in mBERT and on translations into French, German, Dutch and Finnish.
+They note that case marking in German and Finnish could change the computation, yet the layer profiles were similar.
+\citet{ferrando2024} traced English and Spanish agreement in Gemma 2B to one mid-layer head that writes the subject's number along a single direction, which later MLP neurons read.
+\citet{papadimitriou2021} trained probes on mBERT to tell transitive subjects from objects.
+Their decisions about intransitive subjects follow each language's case alignment, Hindi's included.
+
+\paragraph{Circuits and their evaluation.}
+Attribution patching approximates activation patching with gradients \citep{syed2024}.
+\citet{wang2023} used path patching to find a circuit of 26 heads for indirect object identification in GPT-2 small.
+They judged it by faithfulness, completeness and minimality, and found backup heads that take over when the main output heads are knocked out.
+\citet{hanna2023} found that late MLPs do the comparison in a greater-than task in the same model, with a few earlier heads passing the start year to them.
+\citet{zhang2024} showed that the corruption and the metric decide which components patching finds, and recommend swapping a token for a similar one over adding noise.
+\citet{arora2024} benchmark causal methods on linguistic tasks, agreement among them, and use a control task to measure how much of an effect a method brings by itself.
+
+\paragraph{Scoring masked encoders.}
+A masked encoder gives no left-to-right probability.
+\citet{salazar2020} score a sentence by masking its tokens one at a time.
+\citet{kauf2023} show that this inflates the scores of words split into several tokens, and also mask the later tokens of the same word.
+\citet{mueller2022} note that masked models offer no principled way to compare spans of different lengths.
+
 \section{Data and Methods}
 \label{sec:methods}
 
