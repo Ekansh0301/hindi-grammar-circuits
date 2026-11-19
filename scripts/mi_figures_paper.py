@@ -359,7 +359,7 @@ def fig_heads():
             heads.append(h); att.append(a[h]); via_obj.append(p[h][0]); via_all.append(p[h][1]); model_of.append(m)
     n = len(heads)
     ypos = [i if i < 5 else i + 0.8 for i in range(n)]
-    fig = plt.figure(figsize=(3.3, 2.35))
+    fig = plt.figure(figsize=(3.3, 2.05))
     a = fig.add_axes([0.20, 0.19, 0.36, 0.67])
     b = fig.add_axes([0.66, 0.19, 0.32, 0.67])
     for ax in (a, b):
@@ -402,7 +402,7 @@ def fig_subject():
     for m in N.MODELS:
         d = {r[0]: float(r[3]) for r in _rows(rec / f"mi_decompose_{m}.md", 5) if len(r) == 5 and r[0] in dict(names)}
         val[m] = [d[k] for k, _ in names]
-    fig = plt.figure(figsize=(3.3, 2.1))
+    fig = plt.figure(figsize=(3.3, 1.85))
     ax = fig.add_axes([0.31, 0.19, 0.66, 0.72])
     style(ax)
     y = np.arange(len(names))

@@ -136,7 +136,9 @@ A masked encoder gives no left-to-right probability.
 
 \subsection{Tasks and data}
 Both tasks use news sentences from the Hindi-Urdu Treebank \citep{bhatt2009}.
-For word order, each of 8,923 written sentences is paired with one grammatical reordering of its own words.
+For word order, each of 8,923 written sentences is paired with one reordering of its own words.
+A reordering moves whole constituents in front of the verb and keeps every word, the verb group and everything after it in place, so it is grammatical by construction, not by speaker judgement.
+We sample one reordering per sentence from 932 news documents, stratified by word-order type.
 The model should prefer the written one.
 For agreement, we take 459 past-tense transitive clauses whose \emph{ne}-marked subject and bare object differ in gender or number.
 Each clause appears in its attested order and in up to 30 reorderings, 5,265 orders in all.
@@ -188,7 +190,7 @@ Each test edits the sentences and compares the edit with a control edit: deletin
 We set the decision rules before the runs.
 Deleting the markers matters if it costs more of the gap than its control (one-sided document sign-flip $p<0.05$).
 The share of the gap the heads restore is size-independent if its difference between reorderings of four or more phrases and single swaps has both interval ends within $\pm0.10$.
-The n-gram cue is the difference in mean per-word cost of the two sentences under a trigram model.
+The n-gram cue is the difference in mean per-word cost of the two sentences under a trigram model trained on about 6 billion tokens of Hindi text (IndicCorp v2).
 Analyses run after the results were read are marked post hoc.
 
 
@@ -439,6 +441,7 @@ The halves swap reads both halves again, so it tests stability, not independent 
 \paragraph{Scope.}
 We study two encoders, one language, one news treebank and stand-alone sentences.
 The findings may not carry to other case-marking languages, to larger models or to running text.
+The reorderings were not rated by speakers, and the trigram's training text was not kept, so the cue cannot be rebuilt exactly.
 We do not redistribute the treebank text, so rebuilding the items needs its release.
 
 \section*{Ethics Statement}
