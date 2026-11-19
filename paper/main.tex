@@ -279,6 +279,57 @@ Within a model the components are stable.
 When the document halves trade roles, faithfulness changes by at most 0.07 in all four cells.
 The same five MLPs are chosen, and 5 to 8 of the ten heads are shared (Appendix~\ref{app:halves}).
 
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{Heads and MLPs.}
+The two judgements differ in how many ways the models can compute them.
+Word order survives the loss of either the top ten heads or the top five MLPs (Section~\ref{sec:redundancy}).
+The output of GPT-2's indirect-object circuit likewise survives the loss of its main output heads, because backup heads take over \citep{wang2023}.
+We speculate that other late heads and MLPs play that role here, but we did not test which components compensate.
+Agreement shows no such backup.
+Ablating ten heads removes about all of it.
+Late MLPs also do the final work in GPT-2's greater-than circuit \citep{hanna2023}, which fits the MLP sets restoring the word-order gap.
+Faithfulness against random sets would still have called both judgements circuits, so necessity has to be reported with it.
+
+\paragraph{What the heads read.}
+Agreement in these encoders is not a rule that finds the case-marked role.
+A \emph{ko}-marked object loses the verb, which fits the finding that mBERT encodes case and treats intransitive subjects in Hindi according to its case alignment \citep{papadimitriou2021}.
+Yet after a swap, \emph{ne} does not stop an object-like noun from pulling the verb, and masking the ne-marked noun lets the verb read the bare noun in SOV-type orders.
+The heads combine a marker cue with lexical and positional cues.
+We speculate that \emph{ne} is a weaker cue than \emph{ko} because ne-marked nouns that look like objects are rare in text.
+\citet{mueller2022} expected case marking in German and Finnish to change the computation but saw similar layer profiles.
+In Hindi, a marker can change what the verb reads, at least for \emph{ko}.
+
+\paragraph{Earlier mechanisms.}
+One mid-layer head writes the subject's number in Gemma \citep{ferrando2024}.
+Our leading heads lie in the upper half of the network and attend from the verb to the object, the controller in the Hindi ergative clause.
+Head interventions under a number swap looked like noise in their English models \citep{finlayson2021}.
+Our corruption finds a small set of late heads in two encoders.
+The two results differ in corruption, model and language, so they do not conflict.
+
+\paragraph{What word order reads.}
+We find no marker or n-gram account of the preference.
+Deleting the moved phrases' markers costs no more than deleting other words.
+The n-gram cue explains part of the gap, but the circuit's effect follows the gap.
+Reordering size is inconclusive (Section~\ref{sec:wordorder}).
+A preference that holds under each test and is carried by many components fits a computation that draws on several cues at once.
+We offer no more specific account.
+
+\paragraph{Two encoders.}
+MuRIL and XLM-R-large build the same judgements from different units of the same kind, late heads and upper MLPs at a similar depth (Section~\ref{sec:models}).
+\citet{mueller2022} also found the same layer profiles across models, with few shared neurons among the masked ones.
+Only the kind and the place match, so we do not say the models share a mechanism.
+
+\paragraph{Measurement.}
+The corruption decides which heads we find.
+Masking the object traces those that carry its features to the verb, and a corruption at another word would trace other components \citep{zhang2024}.
+The swap and masked-slot tests ask the same question on whole sentences, at the price of sentences that are odd in meaning.
+A whole-sentence agreement score can also suggest attraction where there is none.
+MuRIL's score falls by 1.75 bits when the subject stands between the object and the verb, but at the verb neither model is misled (MuRIL $-0.05$, XLM-R-large $+0.16$ bits).
+The fall comes from how the other words are rescored ($-1.81$ bits, Appendix~\ref{app:subject}).
+For a masked encoder, a score over the whole sentence mixes the verb's choice with the rescoring of its neighbours.
+
 \bibliography{custom}
 
 \end{document}
