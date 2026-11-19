@@ -192,11 +192,38 @@ They restore 0.90 [0.86, 0.93] of the gap in MuRIL and 0.78 [0.71, 0.85] in XLM-
 Ablating them removes about all of it (0.97 and 1.08).
 Random head sets do less than 0.01 of either, and the top ten rank first among 100 sets in both tests ($p=10^{-4}$).
 The heads read the object.
-Path patching sends their effect through the object's keys and values (Appendix~\ref{app:heads}).
+The top five attend from the verb to the object (0.26 to 0.73 of their attention), and patching only a head's keys and values at the object restores up to 0.29 of the gap (Table~\ref{tab:heads}).
+Patching them at the subject or \emph{ne} restores nothing, but both runs share those words, so this shows where the effect passes and not that case is unused.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+ & & Attention & \multicolumn{2}{c}{Gap restored at} \\
+\cmidrule(l){4-5}
+Model & Head & to object & object & all words \\
+\midrule
+MuRIL & L10H6 & 0.60 & 0.23 & 0.28 \\
+ & L8H3 & 0.58 & 0.29 & 0.32 \\
+ & L11H1 & 0.42 & 0.09 & 0.13 \\
+ & L9H6 & 0.31 & 0.04 & 0.08 \\
+ & L11H2 & 0.28 & 0.03 & 0.05 \\
+XLM-R & L21H0 & 0.52 & 0.23 & 0.31 \\
+ & L20H0 & 0.73 & 0.20 & 0.23 \\
+ & L20H2 & 0.45 & 0.07 & 0.10 \\
+ & L22H6 & 0.26 & 0.04 & 0.07 \\
+ & L19H3 & 0.26 & 0.04 & 0.04 \\
+\bottomrule
+\end{tabular}
+\caption{The top five agreement heads. Attention is the mean share of the verb span's attention on the object over 52 clauses, renormalised over real subtokens. The last two columns are the share of the gap restored by patching only that head's keys and values from the clean run, at the object or at all positions. At the subject or \emph{ne} the share is under 0.002.}
+\label{tab:heads}
+\end{table}
 
 Word order meets only the first condition.
 The same ten heads restore 0.78 [0.72, 0.84] and 0.53 [0.48, 0.59] of the gap, but ablating them removes only 0.06 [0.00, 0.11] and 0.09 [0.04, 0.13].
-The XLM-R-large value does not replicate when the document halves trade roles (0.02, Appendix~\ref{app:halves}), so we do not read it as necessity.
+The XLM-R-large value does not replicate when the document halves trade roles (0.02, Table~\ref{tab:halves}), so we do not read it as necessity.
 Agreement runs through a compact set of heads.
 For word order, the heads suffice but are not required.
 
@@ -213,6 +240,7 @@ The MLPs behave alike.
 The top five restore 0.98 [0.94, 1.01] and 0.79 [0.74, 0.85] of the word-order gap, yet ablating them removes only 0.32 [0.22, 0.41] and 0.16 [0.08, 0.23] (Figure~\ref{fig:components}c).
 A model has one MLP per block, so no random sets can be matched.
 We compare the top five with every other set of five MLPs instead, 791 in MuRIL and 255 in XLM-R-large.
+The top five are not unique: their faithfulness ranks 3 of 792 sets in MuRIL and 15 of 256 in XLM-R-large (Appendix~\ref{app:sets}).
 What a set restores rises with how late its blocks lie (0.010 per block [0.007, 0.013] in XLM-R-large), and in MuRIL 30 other sets restore within 0.02 of the top five.
 Late heads and late MLPs can each carry the preference, and removing either leaves most of it, so word order is redundant.
 
@@ -271,19 +299,68 @@ It does not (Figure~\ref{fig:wordorder}a).
 Across 223 pairs, the gap kept after deleting the markers is 0.94 (MuRIL) and 0.96 (XLM-R-large) of the original, against 1.05 and 1.12 after deleting as many other words.
 The shares are not exactly one because deleting words changes the per-word mean, so only their difference matters.
 The differences are 0.04 bits [$-0.05$, 0.15] and 0.05 [$-0.03$, 0.14] (one-sided $p=0.19$ and 0.13).
-A control matched in kind, deleting distant postpositions, agrees (131 pairs), though it lies farther from the moved phrases (Appendix~\ref{app:wordorder}).
+A control matched in kind, deleting distant postpositions, agrees (131 pairs), though it lies farther from the moved phrases (8.9 words from the nearest moved head word against 1.1) and holds more genitives (46\% against 6\%; Appendix~\ref{app:wordorder}).
 We find no evidence that the moved phrases' markers matter more than other words.
 
 Adjacency statistics explain part of the preference, but not all of it.
 The n-gram cue is the difference in mean per-word surprisal of the two sentences under a trigram model, and it correlates most strongly with the gap ($|\rho|=0.50$ and 0.46).
-Where it favours the reordered sentence (60 pairs), the models still prefer the written one in 62\% of pairs.
-There the circuit's effect in bits depends on the gap and not on the cue.
-Given the gap, the interval of the cue's coefficient lies within $\pm0.11$ bits of zero (Figure~\ref{fig:wordorder}b, c).
+Where it favours the reordered sentence (60 pairs), the models still prefer the written one in 62\% of pairs (Table~\ref{tab:cues}).
+The ten heads restore a larger share of those smaller gaps, which our declared rule read as cue dependence in XLM-R-large and left inconclusive in MuRIL.
+In bits, however, the effect follows the gap: in a regression run after the results were read, the cue's coefficient, given the gap, lies within $\pm0.11$ bits of zero for both circuit parts and both models (Figure~\ref{fig:wordorder}b, c; Appendix~\ref{app:wordorder}).
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Model & Cue favours & Pairs & Written & Gap & Heads \\
+\midrule
+MuRIL & written & 410 & 82.7 & 0.68 & 0.70 \\
+ & reordered & 60 & 61.7 & 0.16 & 0.90 \\
+XLM-R & written & 410 & 83.2 & 0.54 & 0.47 \\
+ & reordered & 60 & 61.7 & 0.17 & 0.79 \\
+\bottomrule
+\end{tabular}
+\caption{Pairs by n-gram cue. Written: percent of pairs where the model prefers the written order. Gap: mean gap in bits. Heads: share of the gap the ten heads restore, over pairs above the gap floor.}
+\label{tab:cues}
+\end{table}
 
 Reordering size does not settle the question.
 The top ten heads restore a flat or slightly rising share of the gap from single swaps to four or more (by 0.03 [$-0.09$, 0.15] and 0.02 [$-0.11$, 0.13]).
 The intervals are wider than the $\pm0.10$ band we set for calling it size-independent, so the result is inconclusive (Appendix~\ref{app:wordorder}).
 Word order is not shown to be read through case markers, and n-gram statistics do not fully account for it.
+
+\subsection{The intervening subject}
+\label{sec:subject}
+
+A whole-sentence agreement score can suggest attraction by a nearby noun where none acts at the verb.
+MuRIL's whole-sentence score falls by 1.75 bits when the subject stands between the object and the verb (OSV-type minus SOV-type orders, matched on gap, 102 clauses, $p=10^{-4}$).
+At the agreeing words, scored as one chain, the same contrast is $-0.05$ bits ($p=0.80$) in MuRIL and $+0.16$ ($p=0.26$) in XLM-R-large, so neither model is misled at the verb.
+Table~\ref{tab:subject} splits the whole-sentence score by word class.
+Most of the fall lies in the words other than the verb, object, subject and \emph{ne}, and the subject phrase moves the other way, so in XLM-R-large the parts nearly cancel.
+A masked encoder's score over a whole sentence mixes the verb's choice with the rescoring of its neighbours, so the circuit analyses score the verb's words.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Part of the score & MuRIL & XLM-R \\
+\midrule
+Whole sentence & $-1.75$ & $-0.21$ \\
+Agreeing words & $-0.23$ & $+0.09$ \\
+Rest of verb & $+0.15$ & $-0.09$ \\
+Object & $-0.45$ & $-0.11$ \\
+Subject & $+0.48$ & $+0.75$ \\
+\emph{ne} & $+0.12$ & $-0.03$ \\
+Other words & $-1.81$ & $-0.82$ \\
+\bottomrule
+\end{tabular}
+\caption{Contrast between OSV-type and SOV-type orders, in bits, by word class. The class rows sum to the whole sentence. Sign-flip $p\le0.0002$ for MuRIL's whole sentence, subject and other words and for XLM-R-large's subject and other words; MuRIL's object has $p=0.018$ and \emph{ne} $p=0.044$, and the other rows $p>0.1$. The agreeing-word row scores each sentence on its own, so it differs slightly from the one-chain values in the text.}
+\label{tab:subject}
+\end{table}
 
 \subsection{The two models}
 \label{sec:models}
@@ -293,8 +370,26 @@ In agreement, the top five heads lie in layers 8 to 11 of 12 in MuRIL and 19 to 
 In word order, the top MLPs lie in layers 6 to 10 and 17 to 21.
 No head can be matched across models, but both models use the upper half of the network.
 Within a model the components are stable.
-When the document halves trade roles, faithfulness changes by at most 0.07 in all four cells.
-The same five MLPs are chosen, and 5 to 8 of the ten heads are shared (Appendix~\ref{app:halves}).
+When the document halves trade roles, faithfulness changes by at most 0.07 in all four cells, and the same five MLPs are chosen (Table~\ref{tab:halves}).
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+ & & \multicolumn{2}{c}{Faithfulness} & \multicolumn{2}{c}{Necessity} & Shared \\
+Task & Model & main & swap & main & swap & heads / MLPs \\
+\midrule
+Agr. & MuRIL & 0.90 & 0.83 & 0.97 & 0.94 & 8 / 5 \\
+ & XLM-R & 0.78 & 0.74 & 1.08 & 1.01 & 7 / 5 \\
+Order & MuRIL & 0.78 & 0.78 & 0.06 & 0.07 & 7 / 5 \\
+ & XLM-R & 0.53 & 0.53 & 0.09 & 0.02 & 5 / 5 \\
+\bottomrule
+\end{tabular}
+\caption{Top ten heads chosen on the selection half and measured on the held-out half (main), and the reverse (swap). Shared: heads in both top-ten lists, and MLPs in both top-five lists. XLM-R-large word-order necessity does not replicate ($p=0.93$ when swapped).}
+\label{tab:halves}
+\end{table}
 
 \section{Discussion}
 \label{sec:discussion}
@@ -340,10 +435,8 @@ Only the kind and the place match, so we do not say the models share a mechanism
 The corruption decides which heads we find.
 Masking the object traces those that carry its features to the verb, and a corruption at another word would trace other components \citep{zhang2024}.
 The swap and masked-slot tests ask the same question on whole sentences, at the price of sentences that are odd in meaning.
-A whole-sentence agreement score can also suggest attraction where there is none.
-MuRIL's score falls by 1.75 bits when the subject stands between the object and the verb, but at the verb neither model is misled (MuRIL $-0.05$, XLM-R-large $+0.16$ bits).
-The fall comes from how the other words are rescored ($-1.81$ bits, Appendix~\ref{app:subject}).
-For a masked encoder, a score over the whole sentence mixes the verb's choice with the rescoring of its neighbours.
+A whole-sentence agreement score can also suggest attraction where none acts at the verb (Section~\ref{sec:subject}).
+For a masked encoder it mixes the verb's choice with the rescoring of its neighbours, so a score meant to locate a mechanism should cover the words the mechanism writes.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -435,61 +528,6 @@ Fresh, all & size, cues & 471 & 334 \\
 \label{tab:splits}
 \end{table}
 
-\section{Attention and path patching of the top heads}
-\label{app:heads}
-Table~\ref{tab:heads} adds what the top five agreement heads attend to and which positions carry their effect.
-The subject and \emph{ne} rows are near zero in path patching because both runs share the subject and \emph{ne}, so this holds by construction and is not evidence about case.
-
-\begin{table*}[!ht]
-\centering
-\small
-\begin{tabular}{@{}llcccccccc@{}}
-\toprule
- & & \multicolumn{3}{c}{Attention from the verb to} & \multicolumn{4}{c}{Gap restored through the keys and values at} \\
-\cmidrule(lr){3-5}\cmidrule(lr){6-9}
-Model & Head & object & subject & \emph{ne} & object & subject & \emph{ne} & all positions \\
-\midrule
-MuRIL & L10H6 & 0.60 & 0.01 & 0.01 & 0.23 & 0.00 & 0.00 & 0.28 \\
- & L8H3 & 0.58 & 0.03 & 0.11 & 0.29 & 0.00 & 0.00 & 0.32 \\
- & L11H1 & 0.42 & 0.02 & 0.03 & 0.09 & 0.00 & 0.00 & 0.13 \\
- & L9H6 & 0.31 & 0.01 & 0.02 & 0.04 & 0.00 & 0.00 & 0.08 \\
- & L11H2 & 0.28 & 0.03 & 0.05 & 0.03 & 0.00 & 0.00 & 0.05 \\
-XLM-R-large & L21H0 & 0.52 & 0.01 & 0.00 & 0.23 & 0.00 & 0.00 & 0.31 \\
- & L20H0 & 0.73 & 0.01 & 0.01 & 0.20 & 0.00 & 0.00 & 0.23 \\
- & L20H2 & 0.45 & 0.01 & 0.07 & 0.07 & 0.00 & 0.00 & 0.10 \\
- & L22H6 & 0.26 & 0.02 & 0.09 & 0.04 & 0.00 & 0.00 & 0.07 \\
- & L19H3 & 0.26 & 0.03 & 0.07 & 0.04 & 0.00 & 0.00 & 0.04 \\
-\bottomrule
-\end{tabular}
-\caption{The top five agreement heads. Attention is the mean share of the verb span's attention over 52 clauses, renormalised over real subtokens. The path columns are shares of the gap restored by patching only that head's keys and values from the clean run.}
-\label{tab:heads}
-\end{table*}
-
-\section{Halves exchanged}
-\label{app:halves}
-Table~\ref{tab:halves} repeats the head and MLP selection with the two halves trading roles.
-Faithfulness replicates in all four cells.
-XLM-R-large word-order necessity does not (0.09 in the main analysis, 0.02 when the halves trade roles, $p=0.93$), so we do not read that value as necessity.
-
-\begin{table}[!ht]
-\centering
-\small
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llccccc@{}}
-\toprule
- & & \multicolumn{2}{c}{Faithfulness} & \multicolumn{2}{c}{Necessity} & Shared \\
-Task & Model & main & swap & main & swap & heads / MLPs \\
-\midrule
-Agr. & MuRIL & 0.90 & 0.83 & 0.97 & 0.94 & 8 / 5 \\
- & XLM-R & 0.78 & 0.74 & 1.08 & 1.01 & 7 / 5 \\
-Order & MuRIL & 0.78 & 0.78 & 0.06 & 0.07 & 7 / 5 \\
- & XLM-R & 0.53 & 0.53 & 0.09 & 0.02 & 5 / 5 \\
-\bottomrule
-\end{tabular}
-\caption{Top ten heads chosen on the selection half and measured on the held-out half (main), and the reverse (swap). Shared: heads in both top-ten lists, and MLPs in both top-five lists.}
-\label{tab:halves}
-\end{table}
-
 \section{Head sets, MLP sets and ablation}
 \label{app:sets}
 Table~\ref{tab:setsize} gives the head-set sizes behind Figure~\ref{fig:components}b, with zero ablation and the language-modelling cost of mean ablation.
@@ -546,9 +584,7 @@ Order & MuRIL & 0.98 [0.94, 1.01] & 0.84 & 3 of 792 & 0.32 [0.22, 0.41] & 0.42 &
 \label{app:wordorder}
 
 \paragraph{Marker control.}
-The control that deletes distant postpositions is farther from the moved phrases than the markers are, and it differs in kind.
-The deleted words lie 8.9 words from the nearest moved head word on average, against 1.1 for the markers, and 46\% of them are genitives (\emph{ka}, \emph{ki}, \emph{ke}), against 6\% of the markers.
-Table~\ref{tab:kind} gives both controls.
+Table~\ref{tab:kind} gives the three controls.
 The control matched in string and place has only 17 pairs, so its result is inconclusive.
 
 \begin{table*}[!ht]
@@ -569,29 +605,7 @@ Same strings and place & 17 & $-0.21$ [$-0.47$, 0.01] & 0.02 [$-0.17$, 0.23] \\
 \end{table*}
 
 \paragraph{Cue strata.}
-Table~\ref{tab:cues} splits the 471 fresh pairs by whether the n-gram cue favours the written or the reordered sentence.
-Where it favours the reordered sentence, the gap is smaller and the share of it that the ten heads restore is higher.
-Our declared rule read this as cue dependence in XLM-R-large and left MuRIL inconclusive.
-A regression of the effect in bits on the gap and the stratum, run after the results were read, puts the stratum's coefficient, for the primary cue, within $\pm0.11$ bits of zero in both models and for both circuit parts.
-So the higher share follows from the smaller gap.
-
-\begin{table}[!ht]
-\centering
-\small
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llcccc@{}}
-\toprule
-Model & Cue favours & Pairs & Written & Gap & Heads \\
-\midrule
-MuRIL & written & 410 & 82.7 & 0.68 & 0.70 \\
- & reordered & 60 & 61.7 & 0.16 & 0.90 \\
-XLM-R & written & 410 & 83.2 & 0.54 & 0.47 \\
- & reordered & 60 & 61.7 & 0.17 & 0.79 \\
-\bottomrule
-\end{tabular}
-\caption{Pairs by n-gram cue. Written: percent of pairs where the model prefers the written order. Gap: mean gap in bits. Heads: share of the gap the ten heads restore, over pairs above the gap floor.}
-\label{tab:cues}
-\end{table}
+The post hoc regression of the effect in bits on the gap and the stratum gives a stratum coefficient of $-0.03$ [$-0.11$, 0.06] bits for the ten heads and 0.01 [$-0.04$, 0.05] for the five MLPs in MuRIL, and 0.00 [$-0.05$, 0.06] and 0.01 [$-0.06$, 0.08] in XLM-R-large (primary cue, 1,000 document-bootstrap draws).
 
 \paragraph{Reordering size.}
 Table~\ref{tab:size} gives the ten heads' share by the number of phrases moved.
@@ -614,36 +628,5 @@ Moves & Pairs & gap & share & gap & share \\
 \caption{Mean gap (bits) and share of it restored by the ten heads, by the number of phrase moves.}
 \label{tab:size}
 \end{table}
-
-\section{The intervening subject}
-\label{app:subject}
-A whole-sentence agreement score of MuRIL falls by 1.75 bits when the subject stands between the object and the verb (OSV-type minus SOV-type orders, matched on gap, 102 clauses, $p=10^{-4}$).
-At the agreeing words, scored as one chain, the same contrast is $-0.05$ bits ($p=0.80$) in MuRIL and $+0.16$ bits ($p=0.26$) in XLM-R-large.
-Table~\ref{tab:subject} splits the whole-sentence score by word class.
-Most of the fall lies in the words other than the verb, the object, the subject and \emph{ne}.
-The subject phrase moves the other way in both models, so in XLM-R-large the two parts nearly cancel.
-The agreeing-word row here scores each sentence on its own, and so differs slightly from the one-chain value above.
-
-\begin{table}[!ht]
-\centering
-\small
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lcc@{}}
-\toprule
-Part of the score & MuRIL & XLM-R \\
-\midrule
-Whole sentence & $-1.75$ & $-0.21$ \\
-Agreeing words & $-0.23$ & $+0.09$ \\
-Rest of verb & $+0.15$ & $-0.09$ \\
-Object & $-0.45$ & $-0.11$ \\
-Subject & $+0.48$ & $+0.75$ \\
-\emph{ne} & $+0.12$ & $-0.03$ \\
-Other words & $-1.81$ & $-0.82$ \\
-\bottomrule
-\end{tabular}
-\caption{Contrast between OSV-type and SOV-type orders, in bits, by word class. The class rows sum to the whole sentence. Sign-flip $p\le0.0002$ for MuRIL's whole sentence, subject and other words and for XLM-R-large's subject and other words; MuRIL's object has $p=0.018$ and \emph{ne} $p=0.044$, and the other rows $p>0.1$.}
-\label{tab:subject}
-\end{table}
-
 
 \end{document}
