@@ -74,6 +74,129 @@ Tests of what the components read use documents in neither half.
   \label{fig:design}
 \end{figure*}
 
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Components}
+\label{sec:components}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig2_components.pdf}
+  \caption{Components. (a) The top ten heads on the held-out half: share of the gap restored by patching them (faithfulness) and lost by ablating them (necessity), with 95\% document-bootstrap intervals. Grey bars span the mean to the 95th percentile of the comparison sets: 100 random head sets in (a), and in (c) every other set of five MLPs (791 in MuRIL, 255 in XLM-R-large). (b) Necessity of the top $K$ heads. Panels (b) and (c) use documents in neither half.}
+  \label{fig:components}
+\end{figure*}
+
+If a few heads carry a judgement, patching only them should restore the gap, ablating only them should remove it, and random heads from the same blocks should do neither.
+In agreement, the top ten heads meet all three conditions in both models (Figure~\ref{fig:components}a).
+They restore 0.90 [0.86, 0.93] of the gap in MuRIL and 0.78 [0.71, 0.85] in XLM-R-large.
+Ablating them removes about all of it (0.97 and 1.08).
+Random head sets do less than 0.01 of either, and the top ten rank first among 100 sets in both tests ($p=10^{-4}$).
+The heads read the object.
+Path patching sends their effect through the object's keys and values (Appendix~\ref{app:heads}).
+
+Word order meets only the first condition.
+The same ten heads restore 0.78 [0.72, 0.84] and 0.53 [0.48, 0.59] of the gap, but ablating them removes only 0.06 [0.00, 0.11] and 0.09 [0.04, 0.13].
+The XLM-R-large value does not replicate when the document halves trade roles (0.02, Appendix~\ref{app:halves}), so we do not read it as necessity.
+Agreement runs through a compact set of heads.
+For word order, the heads suffice but are not required.
+
+\subsection{Redundancy}
+\label{sec:redundancy}
+
+A larger set of heads might still be required for word order.
+As $K$ grows, the top $K$ heads restore more of the gap, 0.98 at $K=20$ in MuRIL and 0.84 at $K=40$ in XLM-R-large.
+Ablating them removes little: 0.19 at $K=40$ in MuRIL, where that is 28\% of the heads, and 0.07 in XLM-R-large (Figure~\ref{fig:components}b).
+Zero ablation agrees (Appendix~\ref{app:sets}).
+For agreement, ablating ten heads removes 0.94 and 0.89 of the gap.
+
+The MLPs behave alike.
+The top five restore 0.98 [0.94, 1.01] and 0.79 [0.74, 0.85] of the word-order gap, yet ablating them removes only 0.32 [0.22, 0.41] and 0.16 [0.08, 0.23] (Figure~\ref{fig:components}c).
+A model has one MLP per block, so no random sets can be matched.
+We compare the top five with every other set of five MLPs instead, 791 in MuRIL and 255 in XLM-R-large.
+What a set restores rises with how late its blocks lie (0.010 per block [0.007, 0.013] in XLM-R-large), and in MuRIL 30 other sets restore within 0.02 of the top five.
+Late heads and late MLPs can each carry the preference, and removing either leaves most of it, so word order is redundant.
+
+\subsection{What agreement reads}
+\label{sec:swap}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig3_agreement.pdf}
+  \caption{What agreement reads. (a) Margin toward the object-agreeing form when ko or the particle bhi is inserted after the object (956 orders). (b, c) Margin toward the form that agrees with the bare noun after the two noun phrases swap places (2,132 orders), (b) unswapped and swapped, (c) with one slot masked. In SOV-type orders the subject comes first, in OSV-type orders the object. Bars are 95\% document-bootstrap intervals.}
+  \label{fig:agreement}
+\end{figure*}
+
+The heads read the object, but why does the object control the verb?
+Three accounts predict different outcomes.
+Under the case account, the verb agrees with the bare noun.
+A marker that makes the object ineligible should then send it to the default form, and swapping the noun phrases should move agreement to the other noun.
+Under the plausibility account, it agrees with the noun that looks like an object, and neither should happen.
+Under the position account, it agrees with the noun nearest the verb, and only the swap depends on word order.
+
+Deleting \emph{ne} costs the margin 4.2 bits [3.6, 4.8] (MuRIL) and 3.4 [2.9, 3.9] (XLM-R-large) more than deleting an unrelated word ($p=10^{-4}$).
+A fall was expected, since the sentence is no longer grammatical, and the object form is still preferred in 71\% and 75\% of orders.
+Inserting \emph{ko} after the object keeps the sentence grammatical and makes the default masculine form correct (Figure~\ref{fig:agreement}a).
+The control, the particle \emph{bhi} at the same place, leaves agreement intact, with the object form preferred in 96\% and 97\% of orders.
+With \emph{ko}, the default form is preferred in 75\% and 68\%.
+The top five heads' attention to the object falls from 0.52 to 0.22 and from 0.51 to 0.23, partly to \emph{ko} itself.
+Both models treat a \emph{ko}-marked noun as ineligible.
+
+The swap tells against the case account (Figure~\ref{fig:agreement}b).
+We exchange the two noun phrases and leave \emph{ne} in place, so the correct form becomes the one that agrees with the new bare noun.
+Unswapped, its margin is 6.5 to 8.7 bits.
+After the swap it is negative in every cell, between $-0.8$ and $-4.0$ bits ($p=10^{-4}$, except MuRIL SOV-type, 0.07).
+Both models prefer the form that agrees with the old object, which now carries \emph{ne}.
+The effect is stronger where the bare-noun form is not the default ($-2.0$ to $-5.3$ bits), so the frequent default form does not explain it.
+The swapped sentences are odd in meaning, and part of the effect may be oddness.
+
+Masking one noun at a time shows what the verb reads (Figure~\ref{fig:agreement}c).
+Masking the ne-marked noun raises the margin by 2.0 to 4.0 bits in every class and model ($p=10^{-4}$).
+It turns positive in SOV-type orders, where the bare noun stands next to the verb, and stays near or below zero in OSV-type orders.
+Masking the bare noun lowers the margin only in MuRIL.
+After a swap the verb reads both nouns, and an object-like noun still pulls it when \emph{ne} marks that noun.
+Agreement is sensitive to a case marker next to the noun but does not simply follow the case-marked role.
+
+\subsection{What word order reads}
+\label{sec:wordorder}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig4_wordorder.pdf}
+  \caption{What word order reads. (a) Gap kept after deleting other words or distant postpositions, minus the gap kept after deleting the moved phrases' markers (bits, 95\% document-bootstrap intervals). (b, c) The five MLPs' effect against the gap, one point per pair, by whether the n-gram cue favours the written or the reordered sentence. Lines are least-squares fits per group.}
+  \label{fig:wordorder}
+\end{figure*}
+
+If word order were read through case, deleting the moved phrases' markers should cost more of the gap than deleting other words.
+It does not (Figure~\ref{fig:wordorder}a).
+Across 223 pairs, the gap kept after deleting the markers is 0.94 (MuRIL) and 0.96 (XLM-R-large) of the original, against 1.05 and 1.12 after deleting as many other words.
+The differences are 0.04 bits [$-0.05$, 0.15] and 0.05 [$-0.03$, 0.14] (one-sided $p=0.19$ and 0.13).
+A control matched in kind, deleting distant postpositions, agrees (131 pairs), though it lies farther from the moved phrases (Appendix~\ref{app:wordorder}).
+We find no evidence that the moved phrases' markers matter more than other words.
+
+Adjacency statistics explain part of the preference, but not all of it.
+The n-gram cue correlates most strongly with the gap ($|\rho|=0.50$ and 0.46).
+Where it favours the reordered sentence (60 pairs), the models still prefer the written one in 62\% of pairs.
+There the circuit's effect in bits depends on the gap and not on the cue.
+Given the gap, the interval of the cue's coefficient lies within $\pm0.11$ bits of zero (Figure~\ref{fig:wordorder}b, c).
+
+Reordering size does not settle the question.
+The top ten heads restore a flat or slightly rising share of the gap from single swaps to four or more (by 0.03 [$-0.09$, 0.15] and 0.02 [$-0.11$, 0.13]).
+The intervals are wider than the $\pm0.10$ band we set for calling it size-independent, so the result is inconclusive (Appendix~\ref{app:wordorder}).
+Word order is not shown to be read through case markers, and n-gram statistics do not account for it.
+
+\subsection{The two models}
+\label{sec:models}
+
+The two models build both judgements from different components of the same kind.
+In agreement, the five leading heads lie in layers 8 to 11 of 12 in MuRIL and 19 to 22 of 24 in XLM-R-large.
+In word order, the top MLPs lie in layers 6 to 10 and 17 to 21.
+No head can be matched across models, but both models use the upper half of the network.
+Within a model the components are stable.
+When the document halves trade roles, faithfulness changes by at most 0.07 in all four cells.
+The same five MLPs are chosen, and 5 to 8 of the ten heads are shared (Appendix~\ref{app:halves}).
+
 \bibliography{custom}
 
 \end{document}

@@ -2,6 +2,9 @@
 """Figures of the paper (paper/figures/). numpy and matplotlib only; reads course_runs/outputs where a figure needs data.
 
 fig1_design   the two tasks side by side: the clean run, the corrupted run and the metric (no data)
+fig2_components  top ten heads, head-set size, top five MLPs (word order)
+fig3_agreement   what agreement reads: ko and bhi insertion, role swap, masked slot
+fig4_wordorder   what word order reads: marker deletion against two controls, cue strata
 
 usage: python3 scripts/mi_figures_paper.py
 """
@@ -12,6 +15,13 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch  # noqa: E402
+
+import sys  # noqa: E402
+
+import numpy as np  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mi_paper_numbers as N  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "paper" / "figures"
@@ -95,6 +105,226 @@ def panel_agreement(ax):
     ax.axis("off")
 
 
+C_MODEL = {"muril": "#0072B2", "xlmrlarge": "#D55E00"}   # one colour per model in every figure
+L_MODEL = {"muril": "MuRIL", "xlmrlarge": "XLM-R-large"}
+GREYP = "#8a8a8a"
+
+
+def style(ax):
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    ax.tick_params(length=2, width=0.5, labelsize=6)
+    for s in ("left", "bottom"):
+        ax.spines[s].set_linewidth(0.5)
+
+
+def ci_pt(ax, x, v, lo, hi, color, marker, filled=True, size=3.6, lw=0.9):
+    ax.errorbar([x], [v], yerr=[[v - lo], [hi - v]], fmt=marker, ms=size, color=color, mfc=color if filled else "white",
+                mec=color, mew=0.9, elinewidth=lw, capsize=1.5, capthick=0.7, zorder=3)
+
+
+def cell_panel(ax, cells, title, ymax=1.28):
+    """Faithfulness (filled circle) and necessity (open square) of a set of components in four or two cells, with the
+    comparison sets (grey: mean and 95th percentile)."""
+    ax.set_title(title, loc="left", fontsize=6.8, fontweight="bold", pad=2)
+    for i, (m, st) in enumerate(cells):
+        for j, (key, mk, fill) in enumerate((("faithfulness", "o", True), ("necessity", "s", False))):
+            x = i + (-0.17 if j == 0 else 0.17)
+            v = st[key]
+            ci_pt(ax, x, v["share"], v["ci"][0], v["ci"][1], C_MODEL[m], mk, fill)
+            rm, rp = v["rand_mean"], v["rand_p95"]
+            ax.plot([x + 0.0, x + 0.0], [rm, rp], color=GREYP, lw=2.2, alpha=0.55, solid_capstyle="butt", zorder=1)
+            ax.plot([x], [rm], marker="_", ms=4, color="#555555", zorder=2)
+    ax.axhline(1.0, color="#bbbbbb", lw=0.5, ls=":", zorder=0)
+    ax.axhline(0.0, color="#bbbbbb", lw=0.5, zorder=0)
+    ax.set_ylim(-0.1, ymax)
+    ax.set_xlim(-0.6, len(cells) - 0.4)
+    style(ax)
+
+
+def fig2():
+    num = N.main_numbers() if hasattr(N, "main_numbers") else None
+    v = {t: {m: N.validate(t, m) for m in N.MODELS} for t in N.TASKS}
+    ss = {t: {m: N.setsize(t, m) for m in N.MODELS} for t in N.TASKS}
+    ml = {m: N.mlpsets("wordorder", m) for m in N.MODELS}
+    fig = plt.figure(figsize=(6.3, 2.35))
+    a = fig.add_axes([0.065, 0.20, 0.40, 0.58])
+    b = fig.add_axes([0.55, 0.20, 0.20, 0.58])
+    c = fig.add_axes([0.81, 0.20, 0.18, 0.58])
+    cells = [("muril", v["object"]["muril"]), ("xlmrlarge", v["object"]["xlmrlarge"]),
+             ("muril", v["wordorder"]["muril"]), ("xlmrlarge", v["wordorder"]["xlmrlarge"])]
+    cell_panel(a, cells, "(a) Top ten heads")
+    a.set_xticks(range(4))
+    a.set_xticklabels(["MuRIL", "XLM-R", "MuRIL", "XLM-R"], fontsize=6)
+    a.text(0.5, -0.24, "agreement", ha="center", fontsize=6.3, transform=a.get_xaxis_transform())
+    a.text(2.5, -0.24, "word order", ha="center", fontsize=6.3, transform=a.get_xaxis_transform())
+    a.set_ylabel("share of the gap", fontsize=6.5)
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], marker="o", ls="", color="#444444", ms=3.4, label="faithfulness"),
+               Line2D([], [], marker="s", ls="", color="#444444", mfc="white", ms=3.4, label="necessity"),
+               Line2D([], [], color=GREYP, lw=2.2, alpha=0.55, label="random or other sets: mean to 95th pct"),
+               Line2D([], [], color="#444444", lw=0.9, ls="-", label="agreement (b)"),
+               Line2D([], [], color="#444444", lw=0.9, ls="--", label="word order (b)")]
+    fig.legend(handles=handles, loc="upper center", ncol=5, fontsize=5.6, frameon=False, bbox_to_anchor=(0.5, 1.01),
+               handletextpad=0.3, columnspacing=1.0)
+    # (b) necessity against head-set size
+    b.set_title("(b) Necessity, top K heads", loc="left", fontsize=6.8, fontweight="bold", pad=2)
+    Ks = [5, 10, 20, 40]
+    for t, ls in (("object", "-"), ("wordorder", "--")):
+        for m in N.MODELS:
+            y = [ss[t][m][k]["necessity"]["share"] for k in Ks]
+            lo = [ss[t][m][k]["necessity"]["ci"][0] for k in Ks]
+            hi = [ss[t][m][k]["necessity"]["ci"][1] for k in Ks]
+            off = -0.04 if m == "muril" else 0.04
+            xs = np.arange(4) + off
+            b.errorbar(xs, y, yerr=[np.array(y) - lo, np.array(hi) - y], color=C_MODEL[m], ls=ls, lw=0.9, marker="o" if t == "object" else "s",
+                       ms=2.6, mfc=C_MODEL[m] if t == "object" else "white", capsize=1.2, elinewidth=0.6)
+    b.set_xticks(range(4))
+    b.set_xticklabels([str(k) for k in Ks], fontsize=6)
+    b.set_xlabel("top K heads", fontsize=6.3, labelpad=1)
+    b.set_ylim(-0.1, 1.28)
+    b.axhline(1.0, color="#bbbbbb", lw=0.5, ls=":")
+    style(b)
+    # (c) the top five MLPs, word order
+    cm = [(m, {"faithfulness": {"share": ml[m]["faith"]["share"], "ci": ml[m]["faith"]["ci"], "rand_mean": ml[m]["faith"]["others_mean"],
+                                 "rand_p95": ml[m]["faith"]["others_p95"]},
+               "necessity": {"share": ml[m]["necessity"]["share"], "ci": ml[m]["necessity"]["ci"], "rand_mean": ml[m]["necessity"]["others_mean"],
+                             "rand_p95": ml[m]["necessity"]["others_p95"]}}) for m in N.MODELS]
+    cell_panel(c, cm, "(c) Top five MLPs")
+    c.set_xticks(range(2))
+    c.set_xticklabels(["MuRIL", "XLM-R"], fontsize=6)
+    c.set_yticklabels([])
+    OUT.mkdir(parents=True, exist_ok=True)
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig2_components.{ext}", dpi=300 if ext == "png" else None)
+    plt.close(fig)
+
+
+def fig3():
+    ko = {m: N.ko(m) for m in N.MODELS}
+    rs = {m: N.role_swap(m) for m in N.MODELS}
+    mk = {m: N.swap_mask(m) for m in N.MODELS}
+    fig = plt.figure(figsize=(6.3, 2.35))
+    a = fig.add_axes([0.085, 0.20, 0.235, 0.58])
+    b = fig.add_axes([0.415, 0.20, 0.235, 0.58])
+    c = fig.add_axes([0.745, 0.20, 0.245, 0.58])
+    # (a) inserting bhi or ko after the object: margin toward the object-agreeing form
+    a.set_title("(a) Marker after the object", loc="left", fontsize=6.8, fontweight="bold", pad=2)
+    for m in N.MODELS:
+        off = -0.06 if m == "muril" else 0.06
+        for i, v in enumerate(("none", "bhi", "ko")):
+            mean, lo, hi = ko[m][v]["magree"]
+            ci_pt(a, i + off, mean, lo, hi, C_MODEL[m], "o" if m == "muril" else "s", True, 3.4)
+        a.plot(np.arange(3) + off, [ko[m][v]["magree"][0] for v in ("none", "bhi", "ko")], color=C_MODEL[m], lw=0.7, zorder=2)
+    a.axhline(0, color="#999999", lw=0.5)
+    a.set_xticks(range(3))
+    a.set_xticklabels(["as written", "+ bhi", "+ ko"], fontsize=6)
+    a.set_xlim(-0.5, 2.5)
+    a.set_ylabel("margin toward the object-\nagreeing form (bits)", fontsize=5.8, labelpad=1)
+    a.text(-0.45, -1.2, "below 0: default\nform preferred", fontsize=5.3, ha="left", va="top", color="#444444")
+    style(a)
+    # (b) role swap: margin toward the form that agrees with the bare noun, unswapped and swapped
+    b.set_title("(b) Noun phrases swapped", loc="left", fontsize=6.8, fontweight="bold", pad=2)
+    for m in N.MODELS:
+        off = -0.09 if m == "muril" else 0.09
+        for i, cls in enumerate(("SOV", "OSV")):
+            r = rs[m][f"all_{cls}"]
+            ci_pt(b, i + off, r["orig"][0], r["orig"][1], r["orig"][2], C_MODEL[m], "o" if m == "muril" else "s", False, 3.4)
+            ci_pt(b, i + off, r["swap"][0], r["swap"][1], r["swap"][2], C_MODEL[m], "o" if m == "muril" else "s", True, 3.4)
+    b.axhline(0, color="#999999", lw=0.5)
+    b.set_xticks(range(2))
+    b.set_xticklabels(["SOV-type", "OSV-type"], fontsize=6)
+    b.set_xlim(-0.5, 1.5)
+    b.set_ylabel("margin toward the bare\nnoun's form (bits)", fontsize=5.8, labelpad=1)
+    style(b)
+    # (c) masked slot after the swap
+    c.set_title("(c) One slot masked", loc="left", fontsize=6.8, fontweight="bold", pad=2)
+    conds = ("none", "obj", "subj")
+    for m in N.MODELS:
+        for cls, ls, mkr in (("SOV", "-", "o"), ("OSV", "--", "s")):
+            vals = [mk[m][f"all_{cls}"][k] for k in conds]
+            xs = np.arange(3) + (-0.05 if m == "muril" else 0.05)
+            c.errorbar(xs, [v[0] for v in vals], yerr=[[v[0] - v[1] for v in vals], [v[2] - v[0] for v in vals]], color=C_MODEL[m],
+                       ls=ls, lw=0.8, marker=mkr, ms=2.8, mfc=C_MODEL[m] if cls == "SOV" else "white", capsize=1.2, elinewidth=0.6)
+    c.axhline(0, color="#999999", lw=0.5)
+    c.set_xticks(range(3))
+    c.set_xticklabels(["none", "bare\nnoun", "ne-marked\nnoun"], fontsize=6)
+    c.set_xlim(-0.4, 2.4)
+    style(c)
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], marker="o", ls="", color=C_MODEL["muril"], ms=3.4, label="MuRIL"),
+               Line2D([], [], marker="s", ls="", color=C_MODEL["xlmrlarge"], ms=3.4, label="XLM-R-large"),
+               Line2D([], [], marker="o", ls="", color="#444444", mfc="white", ms=3.4, label="unswapped (b)"),
+               Line2D([], [], marker="o", ls="", color="#444444", ms=3.4, label="swapped (b)"),
+               Line2D([], [], color="#444444", lw=0.9, ls="-", label="SOV-type (c)"),
+               Line2D([], [], color="#444444", lw=0.9, ls="--", label="OSV-type (c)")]
+    fig.legend(handles=handles, loc="upper center", ncol=6, fontsize=5.6, frameon=False, bbox_to_anchor=(0.5, 1.01),
+               handletextpad=0.3, columnspacing=1.0)
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig3_agreement.{ext}", dpi=300 if ext == "png" else None)
+    plt.close(fig)
+
+
+def _cases(model):
+    z = np.load(N.OUT / f"case_wordorder_{model}.npz", allow_pickle=True)
+    g = lambda v: z[f"{v}_f_clean"] - z[f"{v}_f_corrupt"]
+    d_rand = g("ctl") - g("psp")
+    k = np.load(N.OUT / f"kind_{model}.npz", allow_pickle=True)
+    gp = dict(zip(k["ids_psp"], k["psp_f_clean"] - k["psp_f_corrupt"]))
+    gk = dict(zip(k["ids_ctlk"], k["ctlk_f_clean"] - k["ctlk_f_corrupt"]))
+    dk = dict(zip(k["ids_ctlk"], k["docs_ctlk"]))
+    ids = [i for i in k["ids_ctlk"] if i in gp]
+    d_kind = np.array([gk[i] - gp[i] for i in ids])
+    return (N.boot_mean(d_rand, z["docs"]), len(d_rand)), (N.boot_mean(d_kind, np.array([dk[i] for i in ids])), len(ids))
+
+
+def fig4():
+    fig = plt.figure(figsize=(6.3, 2.15))
+    a = fig.add_axes([0.20, 0.20, 0.25, 0.58])
+    b = fig.add_axes([0.555, 0.20, 0.205, 0.58])
+    c = fig.add_axes([0.79, 0.20, 0.205, 0.58])
+    a.set_title("(a) Deleting the moved markers", loc="left", fontsize=6.8, fontweight="bold", pad=2, x=-0.62)
+    rows = [("other words,\nsame number", 0), ("distant\npostpositions", 1)]
+    for m in N.MODELS:
+        (r, nr), (k, nk) = _cases(m)
+        for j, (res, n) in enumerate(((r, nr), (k, nk))):
+            y = 1 - j + (0.12 if m == "muril" else -0.12)
+            mean, lo, hi = res
+            a.errorbar([mean], [y], xerr=[[mean - lo], [hi - mean]], fmt="o" if m == "muril" else "s", ms=3.4, color=C_MODEL[m],
+                       capsize=1.5, elinewidth=0.9)
+    a.axvline(0, color="#999999", lw=0.5)
+    a.set_yticks([1, 0])
+    a.set_yticklabels([r[0] for r in rows], fontsize=6)
+    a.set_ylim(-0.6, 1.6)
+    a.set_xlabel("gap kept after the control minus\nafter the markers (bits)", fontsize=6.0, labelpad=1)
+    style(a)
+    for ax, m, ttl in ((b, "muril", "(b) MuRIL"), (c, "xlmrlarge", "(c) XLM-R-large")):
+        rows_ = N.read_csv(N.OUT / f"cues_{m}.csv")
+        gap = N.col(rows_, "gap")
+        eff = N.col(rows_, "eff_5 MLPs jointly")
+        st = np.array([r["stratum_kenlm"] for r in rows_])
+        ax.set_title(ttl, loc="left", fontsize=6.8, fontweight="bold", pad=2)
+        for s, mk, col, lab in (("agrees", "o", "#b5b5b5", "n-gram cue agrees"), ("disagrees", "x", C_MODEL[m], "n-gram cue disagrees")):
+            sel = st == s
+            ax.scatter(gap[sel], eff[sel], s=4 if s == "agrees" else 7, marker=mk, color=col, lw=0.6, label=lab, zorder=2)
+            xs = np.linspace(np.nanmin(gap[sel]), np.nanmax(gap[sel]), 20)
+            co = np.polyfit(gap[sel], eff[sel], 1)
+            ax.plot(xs, np.polyval(co, xs), color="#444444" if s == "agrees" else C_MODEL[m], lw=0.9, zorder=3)
+        ax.set_xlabel("gap (bits)", fontsize=6.2, labelpad=1)
+        if m == "muril":
+            ax.set_ylabel("effect of the five MLPs (bits)", fontsize=6.0)
+        style(ax)
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], marker="o", ls="", color="#b5b5b5", ms=3, label="n-gram cue favours the written order"),
+               Line2D([], [], marker="x", ls="", color="#333333", ms=3.4, label="n-gram cue favours the reordered order"),
+               Line2D([], [], color="#444444", lw=0.9, label="least-squares line per group")]
+    fig.legend(handles=handles, loc="upper center", ncol=3, fontsize=5.6, frameon=False, bbox_to_anchor=(0.5, 1.01),
+               handletextpad=0.3, columnspacing=1.0)
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig4_wordorder.{ext}", dpi=300 if ext == "png" else None)
+    plt.close(fig)
+
+
 def fig1():
     fig = plt.figure(figsize=(6.3, 2.0))
     a = fig.add_axes([0.01, 0.0, 0.47, 0.93])
@@ -109,4 +339,7 @@ def fig1():
 
 if __name__ == "__main__":
     fig1()
-    print("wrote", OUT / "fig1_design.pdf")
+    fig2()
+    fig3()
+    fig4()
+    print("wrote figures in", OUT)
