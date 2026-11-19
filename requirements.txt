@@ -1,0 +1,10 @@
+# Versions the GPU runs used (read from the run records in course_runs/records/, Python 3.12.4 on the cluster).
+# Step 4 and the follow-up stages need a GPU; the figures and the CPU analyses need only numpy, scipy and matplotlib.
+torch==2.5.1
+transformers==4.55.4
+numpy==2.5.3
+pandas==3.0.5
+scikit-learn==1.9.1
+minicons==0.3.39
+scipy>=1.16
+matplotlib>=3.10

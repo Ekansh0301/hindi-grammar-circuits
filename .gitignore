@@ -1,0 +1,29 @@
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Machine-specific logs and smoke tests (smoke tests are never results)
+course_runs/logs/
+course_runs/smoke*/
+course_runs/smoke_tests/
+results/smoke_and_pilot_records/
+
+# Raw outputs of the earlier analyses (3.4 GB)
+results/outputs/
+
+# LaTeX build files (paper/main.pdf is kept)
+paper/*.aux
+paper/*.log
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.out
+paper/*.blg
+paper/*.synctex.gz
+
+# Sentence text (the original treebank release states no redistribution terms) and the held-out sample
+data/agreement/agreement_items.csv
+data/heldout_text/
+course_runs/outputs/items/
+course_runs/outputs/items_extra/
+course_runs/outputs/items_paper/
