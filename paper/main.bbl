@@ -1,0 +1,74 @@
+\begin{thebibliography}{8}
+\providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Bhatt et~al.(2009)Bhatt, Narasimhan, Palmer, Rambow, Sharma, and
+  Xia}]{bhatt2009}
+Rajesh Bhatt, Bhuvana Narasimhan, Martha Palmer, Owen Rambow, Dipti Sharma, and
+  Fei Xia. 2009.
+\newblock \href {https://aclanthology.org/W09-3036/} {A multi-representational
+  and multi-layered treebank for {H}indi/{U}rdu}.
+\newblock In \emph{Proceedings of the Third Linguistic Annotation Workshop
+  ({LAW} {III})}, pages 186--189, Suntec, Singapore. Association for
+  Computational Linguistics.
+
+\bibitem[{Conneau et~al.(2020)Conneau, Khandelwal, Goyal, Chaudhary, Wenzek,
+  Guzm{\'a}n, Grave, Ott, Zettlemoyer, and Stoyanov}]{conneau2020}
+Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume
+  Wenzek, Francisco Guzm{\'a}n, Edouard Grave, Myle Ott, Luke Zettlemoyer, and
+  Veselin Stoyanov. 2020.
+\newblock \href {https://doi.org/10.18653/v1/2020.acl-main.747} {Unsupervised
+  cross-lingual representation learning at scale}.
+\newblock In \emph{Proceedings of the 58th Annual Meeting of the Association
+  for Computational Linguistics}, pages 8440--8451, Online. Association for
+  Computational Linguistics.
+
+\bibitem[{Kauf and Ivanova(2023)}]{kauf2023}
+Carina Kauf and Anna~A. Ivanova. 2023.
+\newblock \href {https://doi.org/10.18653/v1/2023.acl-short.80} {A better way
+  to do masked language model scoring}.
+\newblock In \emph{Proceedings of the 61st Annual Meeting of the Association
+  for Computational Linguistics (Volume 2: Short Papers)}, pages 925--935,
+  Toronto, Canada. Association for Computational Linguistics.
+
+\bibitem[{Khanuja et~al.(2021)Khanuja, Bansal, Mehtani, Khosla, Dey, Gopalan,
+  Margam, Aggarwal, Nagipogu, Dave, Gupta, Gali, Subramanian, and
+  Talukdar}]{khanuja2021}
+Simran Khanuja, Diksha Bansal, Sarvesh Mehtani, Savya Khosla, Atreyee Dey,
+  Balaji Gopalan, Dilip~Kumar Margam, Pooja Aggarwal, Rajiv~Teja Nagipogu,
+  Shachi Dave, Shruti Gupta, Subhash Chandra~Bose Gali, Vish Subramanian, and
+  Partha Talukdar. 2021.
+\newblock {MuRIL}: Multilingual representations for {I}ndian languages.
+\newblock \emph{arXiv preprint arXiv:2103.10730}.
+
+\bibitem[{Mohanan(1994)}]{mohanan1994}
+Tara Mohanan. 1994.
+\newblock \emph{Argument Structure in {H}indi}.
+\newblock CSLI Publications, Stanford, CA.
+
+\bibitem[{Syed et~al.(2024)Syed, Rager, and Conmy}]{syed2024}
+Aaquib Syed, Can Rager, and Arthur Conmy. 2024.
+\newblock \href {https://doi.org/10.18653/v1/2024.blackboxnlp-1.25}
+  {Attribution patching outperforms automated circuit discovery}.
+\newblock In \emph{Proceedings of the 7th {B}lackbox{NLP} Workshop: Analyzing
+  and Interpreting Neural Networks for {NLP}}, pages 407--416, Miami, Florida,
+  US. Association for Computational Linguistics.
+
+\bibitem[{Wang et~al.(2023)Wang, Variengien, Conmy, Shlegeris, and
+  Steinhardt}]{wang2023}
+Kevin Wang, Alexandre Variengien, Arthur Conmy, Buck Shlegeris, and Jacob
+  Steinhardt. 2023.
+\newblock Interpretability in the wild: a circuit for indirect object
+  identification in {GPT-2} small.
+\newblock In \emph{The Eleventh International Conference on Learning
+  Representations}.
+\newblock ArXiv:2211.00593.
+
+\bibitem[{Zhang and Nanda(2024)}]{zhang2024}
+Fred Zhang and Neel Nanda. 2024.
+\newblock Towards best practices of activation patching in language models:
+  Metrics and methods.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}.
+\newblock ArXiv:2309.16042.
+
+\end{thebibliography}
